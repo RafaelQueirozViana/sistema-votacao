@@ -1,6 +1,19 @@
 const API = 'http://localhost:3000';
 const ESPECIAIS = ['branco', 'nulo'];
 let winnerText;
+let _autoRefreshTimer = null;
+
+function iniciarAutoRefresh() {
+    pararAutoRefresh();
+    _autoRefreshTimer = setInterval(carregarVisaoGeral, 5000);
+}
+
+function pararAutoRefresh() {
+    if (_autoRefreshTimer) {
+        clearInterval(_autoRefreshTimer);
+        _autoRefreshTimer = null;
+    }
+}
 
 // ─────────────────────────────────────────────
 // SIDEBAR MOBILE
@@ -45,6 +58,7 @@ async function fazerLogin() {
             document.getElementById('tela-login').style.display = 'none';
             document.getElementById('tela-painel').style.display = 'flex';
             carregarVisaoGeral();
+            iniciarAutoRefresh();
         } else {
             erro.textContent = data.mensagem || 'Usuário ou senha incorretos.';
         }
@@ -60,6 +74,7 @@ document.addEventListener('keydown', e => {
 });
 
 function sair() {
+    pararAutoRefresh();
     document.getElementById('tela-painel').style.display = 'none';
     document.getElementById('tela-login').style.display = 'flex';
     document.getElementById('login-pass').value = '';
@@ -77,7 +92,9 @@ function mostrarAba(aba, btn) {
     btn.classList.add('active');
     fecharSidebar();
 
-    if (aba === 'visao-geral') carregarVisaoGeral();
+    if (aba === 'visao-geral') { carregarVisaoGeral(); iniciarAutoRefresh(); }
+    else { pararAutoRefresh(); }
+
     if (aba === 'relatorio') carregarRelatorio();
     if (aba === 'historico') carregarHistorico();
 }
