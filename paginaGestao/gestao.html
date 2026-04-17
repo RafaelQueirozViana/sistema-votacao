@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Gestão — CIPA</title>
+    <link rel="stylesheet" href="../styles/gestao.css" />
+    <meta name="theme-color" content="#17171A" />
+</head>
+
+<body>
+    <!-- ─── TELA DE LOGIN ────────────────────────────────────── -->
+    <div id="tela-login" class="login-wrap">
+        <div class="login-box">
+            <h1 class="login-title">Painel de Gestão</h1>
+            <div class="field">
+                <label>Usuário</label>
+                <input type="text" id="login-user" placeholder="admin" />
+            </div>
+            <div class="field">
+                <label>Senha</label>
+                <input type="password" id="login-pass" placeholder="••••••" />
+            </div>
+            <p id="login-erro" class="login-erro"></p>
+            <button onclick="fazerLogin()">Entrar</button>
+        </div>
+    </div>
+
+    <!-- ─── MODAL DE NOVA VOTAÇÃO ────────────────────────────── -->
+    <div id="modal-overlay" class="modal-overlay" style="display:none">
+        <div class="modal-box">
+            <h3>Nova Votação</h3>
+            <p class="modal-sub">
+                Preencha os dados e adicione os candidatos. Branco e Nulo são incluídos automaticamente.
+            </p>
+
+            <!-- Metadados da votação -->
+            <div class="modal-meta">
+                <div class="modal-field">
+                    <label>Nome da Votação</label>
+                    <input type="text" id="input-nome-votacao" placeholder="Ex: Eleição CIPA 2025" maxlength="80" />
+                </div>
+                <div class="modal-field">
+                    <label>Descrição</label>
+                    <input type="text" id="input-desc-votacao" placeholder="Breve descrição da votação"
+                        maxlength="200" />
+                </div>
+                <div class="modal-field modal-field-date">
+                    <label>Data de Criação</label>
+                    <input type="text" id="input-data-votacao" readonly />
+                </div>
+            </div>
+
+            <div class="modal-divider"></div>
+
+            <p class="modal-label-section">Candidatos</p>
+
+            <div id="lista-candidatos" class="lista-candidatos"></div>
+
+            <div class="modal-add">
+                <input type="text" id="input-candidato" placeholder="Nome do candidato" maxlength="50" />
+                <button onclick="adicionarCandidato()">Adicionar</button>
+            </div>
+
+            <p id="modal-erro" class="modal-erro"></p>
+
+            <div class="modal-actions">
+                <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+                <button class="btn-confirmar" onclick="confirmarInicio()">Iniciar Nova Votação</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── MODAL DE VISUALIZAÇÃO DO HISTÓRICO ───────────────── -->
+    <div id="modal-historico-overlay" class="modal-overlay" style="display:none">
+        <div class="modal-box modal-box-wide">
+            <div class="modal-hist-header">
+                <div>
+                    <h3 id="hist-modal-nome">—</h3>
+                    <p class="modal-sub" id="hist-modal-desc" style="margin-bottom:4px"></p>
+                    <p class="modal-sub" id="hist-modal-data" style="margin-bottom:0"></p>
+                </div>
+                <button class="btn-cancelar" onclick="fecharModalHistorico()">✕ Fechar</button>
+            </div>
+
+            <div class="modal-divider" style="margin:16px 0 20px"></div>
+
+            <p class="modal-label-section">Resultado Final da Votação</p>
+
+            <div style="overflow-x:auto; border:1px solid #E8E8E4; border-radius:10px; margin-top:10px">
+                <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                        <tr>
+                            <th class="hist-th">Posição</th>
+                            <th class="hist-th">Candidato</th>
+                            <th class="hist-th" style="text-align:right">Votos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hist-modal-tabela"></tbody>
+                </table>
+            </div>
+
+            <p id="hist-modal-vazio"
+                style="display:none;text-align:center;color:#A0A09A;padding:22px;font-size:0.875rem;font-weight:300">
+                Nenhum voto foi registrado nesta votação.
+            </p>
+        </div>
+    </div>
+
+    <!-- ─── PAINEL PRINCIPAL ─────────────────────────────────── -->
+    <div id="tela-painel" class="painel-wrap" style="display:none">
+
+        <!-- Hamburger (mobile) -->
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <!-- Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="fecharSidebar()"></div>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">🗳</div>
+                    <span class="sidebar-brand">Sistema Votos</span>
+                </div>
+                <p class="sidebar-tagline">Painel de Gestão</p>
+            </div>
+
+            <div class="sidebar-nav-section">
+
+                <nav>
+                    <button class="nav-btn active" onclick="mostrarAba('visao-geral', this)">
+                        Status da Votação
+                    </button>
+                    <button class="nav-btn" onclick="mostrarAba('relatorio', this)">
+                        Relatório de Horários
+                    </button>
+                    <button class="nav-btn" onclick="mostrarAba('historico', this)">
+                        Histórico de Votações
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-bottom">
+                <button class="sair-btn" onclick="sair()">
+                    <span class="nav-icon">↩</span> Sair
+                </button>
+            </div>
+        </aside>
+
+        <main class="conteudo">
+
+            <!-- ABA: VISÃO GERAL -->
+            <div id="aba-visao-geral" class="aba">
+
+                <div class="page-header">
+                    <h2>Visão Geral</h2>
+                    <div id="status-badge" class="badge"></div>
+                    <button class="btn-refresh" onclick="carregarVisaoGeral()">↻ Atualizar</button>
+                </div>
+
+                <div class="control-row">
+                    <div class="control-card">
+                        <p class="control-label">Status da Votação</p>
+                        <p id="status-texto" class="control-value">—</p>
+                        <div class="control-actions">
+                            <button id="btn-iniciar" class="btn-green" onclick="iniciarVotacao()">Iniciar
+                                Votação</button>
+                            <button id="btn-encerrar" class="btn-red" onclick="encerrarVotacao()">Encerrar
+                                Votação</button>
+                        </div>
+                    </div>
+                    <div class="control-card">
+                        <p class="control-label">Total de Votos</p>
+                        <p id="total-votos" class="control-value big">—</p>
+                    </div>
+                    <div class="control-card">
+                        <p class="control-label">Funcionários que Votaram</p>
+                        <p id="total-votantes" class="control-value big">—</p>
+                    </div>
+                </div>
+
+                <p class="section-title" id="votacao-text">Votos Computados (até o momento)</p>
+                <p class="winner-text" id="winner-text-el"></p>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Posição</th>
+                                <th>Candidato</th>
+                                <th style="text-align:right">Votos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-resultado"></tbody>
+                    </table>
+                </div>
+
+                <p id="timestamp-geral" class="timestamp"></p>
+            </div>
+
+            <!-- ABA: RELATÓRIO -->
+            <div id="aba-relatorio" class="aba" style="display:none">
+
+                <div class="page-header">
+                    <h2>Relatório de Horários</h2>
+                </div>
+
+                <p class="section-title">Registro de votos por horário</p>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>RE do Funcionário</th>
+                                <th style="text-align:right">Data e Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-relatorio"></tbody>
+                    </table>
+                </div>
+
+                <p id="timestamp-relatorio" class="timestamp"></p>
+            </div>
+
+            <!-- ABA: HISTÓRICO -->
+            <div id="aba-historico" class="aba" style="display:none">
+
+                <div class="page-header">
+                    <h2>Histórico de Votações</h2>
+                    <button class="btn-refresh" onclick="carregarHistorico()">↻ Atualizar</button>
+                </div>
+
+                <p class="section-title">Votações registradas</p>
+
+                <div id="historico-lista" class="historico-lista"></div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script src="gestao.js"></script>
+</body>
+
+</html>

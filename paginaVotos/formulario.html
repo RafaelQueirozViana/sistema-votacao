@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Votação CIPA</title>
+    <link rel="stylesheet" href="../styles/formulario.css" />
+</head>
+
+<body>
+
+    <div class="card">
+
+        <div class="card-header">
+            <p class="tup-logo">TUP TECH</p>
+            <h1>Votação CIPA</h1>
+            <p class="subtitle">Selecione seu voto, insira seu RE e clique em Enviar</p>
+        </div>
+
+        <p id="msg-votacao" style="display:none"></p>
+
+        <form id="mainForm">
+
+            <div class="form-group">
+                <label for="re-funcionario">RE do Funcionário</label>
+                <input type="number" id="re-funcionario"
+                    oninput="if(this.value.length > 5) this.value = this.value.slice(0, 5);" placeholder="Ex: 00123"
+                    max="5" />
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" placeholder="••••••••" />
+            </div>
+
+            <div class="form-group">
+                <label for="voto-input">Candidato</label>
+                <select id="voto-input">
+                    <option value="" disabled selected>Selecione seu voto...</option>
+                </select>
+            </div>
+
+
+            <button type="button" class="btn" onclick="votar()">Enviar Voto</button>
+
+        </form>
+    </div>
+
+    <div id="popup" class="popup">
+        <span class="popup-icon" id="popup-icone"></span>
+        <span id="popup-texto"></span>
+        <button id="popup-fechar" onclick="fecharPopup()">✕</button>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>

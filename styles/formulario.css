@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #FAFAF8;
+    --surface: #FFFFFF;
+    --border: #E8E8E4;
+    --text: #181816;
+    --muted: #A0A09A;
+    --radius: 10px;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 36px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Header ── */
+.card-header {
+    margin-bottom: 32px;
+}
+
+.tup-logo {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+
+.card-header h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 6px;
+}
+
+.card-header .subtitle {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.55;
+}
+
+/* ── Mensagem votação fechada ── */
+#msg-votacao {
+    text-align: center;
+    padding: 28px 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 300;
+}
+
+/* ── Campos ── */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 7px;
+}
+
+input[type="number"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+input[type="number"]:focus,
+input[type="password"]:focus,
+select:focus {
+    border-color: var(--text);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(24, 24, 22, 0.06);
+}
+
+input::placeholder {
+    color: var(--muted);
+    font-weight: 300;
+}
+
+select {
+    cursor: pointer;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%23A0A09A' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+}
+
+/* ── Botão ── */
+.btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 13px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:hover {
+    opacity: 0.82;
+}
+
+.btn:active {
+    transform: scale(0.985);
+}
+
+/* ── Popup de confirmação/erro ── */
+.popup {
+    display: none;
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    z-index: 999;
+    white-space: nowrap;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.popup.sucesso {
+    background: #f0faf3;
+    border-color: #a8d5b5;
+    color: #1a6b30;
+}
+
+.popup.erro {
+    background: #fdf2f2;
+    border-color: #f0b8b8;
+    color: #9b1c1c;
+}
+
+.popup-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+#popup-fechar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.5;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 0 0 4px;
+    transition: opacity 0.1s;
+}
+
+#popup-fechar:hover {
+    opacity: 1;
+}
