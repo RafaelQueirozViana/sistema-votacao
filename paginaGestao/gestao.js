@@ -107,66 +107,127 @@ function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
+function calcPct(votos, totalValidos) {
+    if (!totalValidos) return '—';
+    return (votos / totalValidos * 100).toFixed(1) + '%';
+}
+
+function renderWinnerBanner(normais, containerId) {
+    const el = document.getElementById(containerId);
+    if (!normais.length) { el.style.display = 'none'; return; }
+
+    const maxVotos = normais[0].total;
+    const vencedores = normais.filter(r => r.total === maxVotos);
+    const empate = vencedores.length > 1;
+
+    if (empate) {
+        el.innerHTML = `
+            <div class="winner-banner-inner empate">
+                <div class="winner-banner-label">Empate</div>
+                <div class="winner-banner-nomes">${vencedores.map(v => capitalize(v.candidato)).join(' · ')}</div>
+                <div class="winner-banner-votos">${maxVotos} votos cada</div>
+            </div>`;
+    } else {
+        el.innerHTML = `
+            <div class="winner-banner-inner">
+                <div class="winner-banner-label">🏆 Vencedor</div>
+                <div class="winner-banner-nome">${capitalize(normais[0].candidato)}</div>
+                <div class="winner-banner-votos">${normais[0].total} votos</div>
+            </div>`;
+    }
+    el.style.display = 'block';
+}
+
+function renderTabelaResultado(tbId, normais, especiais, totalValidos) {
+    const tb = document.getElementById(tbId);
+    if (normais.length === 0) {
+        tb.innerHTML = `<tr><td colspan="4" class="empty-row">Nenhum voto registrado ainda</td></tr>`;
+        return;
+    }
+    tb.innerHTML =
+        normais.map((item, i) => `
+            <tr>
+                <td>${i + 1}° Lugar</td>
+                <td>${capitalize(item.candidato)}</td>
+                <td class="right">${item.total}</td>
+                <td class="right">${calcPct(item.total, totalValidos)}</td>
+            </tr>
+        `).join('') +
+        especiais.map(item => `
+            <tr>
+                <td class="dim">—</td>
+                <td class="dim">${capitalize(item.candidato)}</td>
+                <td class="right dim">${item.total}</td>
+                <td class="right dim">—</td>
+            </tr>
+        `).join('');
+}
+
 async function carregarVisaoGeral() {
     try {
-        const [resStatus, resResultado, resVotantes] = await Promise.all([
+        const [resStatus, resResultado] = await Promise.all([
             fetch(API + '/status'),
             fetch(API + '/resultado'),
-            fetch(API + '/votantes')
         ]);
 
         const status = await resStatus.json();
         const resultado = await resResultado.json();
-        const votantes = await resVotantes.json();
 
+        // ── badges e botões ──
         const badge = document.getElementById('status-badge');
         const statusTxt = document.getElementById('status-texto');
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnEnc = document.getElementById('btn-encerrar');
 
         if (status.aberta) {
-            badge.textContent = 'votação em andamento';
+            badge.textContent = 'Votação em andamento';
             badge.className = 'badge aberta';
             statusTxt.textContent = 'Votação em andamento';
             btnIniciar.disabled = true;
             btnEnc.disabled = false;
         } else {
-            badge.textContent = status.iniciada ? 'Nenhuma votação em andamento' : 'Aguardando';
+            badge.textContent = status.iniciada ? 'Encerrada' : 'Aguardando';
             badge.className = status.iniciada ? 'badge encerrada' : 'badge aguardando';
             statusTxt.textContent = status.iniciada ? 'Votação encerrada' : 'Votação não iniciada';
             btnIniciar.disabled = false;
             btnEnc.disabled = true;
         }
 
-        const total = resultado.reduce((s, r) => s + r.total, 0);
-        document.getElementById('total-votos').textContent = total;
-        document.getElementById('total-votantes').textContent = votantes.length;
-
+        // ── métricas ──
         const normais = resultado.filter(r => !ESPECIAIS.includes(r.candidato.toLowerCase()));
         const especiais = resultado.filter(r => ESPECIAIS.includes(r.candidato.toLowerCase()));
         normais.sort((a, b) => b.total - a.total);
 
-        const tb = document.getElementById('tabela-resultado');
-        winnerText = normais[0];
+        const totalVotos = resultado.reduce((s, r) => s + r.total, 0);
+        const totalInvalidos = especiais.reduce((s, r) => s + r.total, 0);
+        const totalValidos = normais.reduce((s, r) => s + r.total, 0);
 
-        if (normais.length === 0) {
-            tb.innerHTML = '<tr><td colspan="3" class="empty-row">Nenhum voto registrado ainda</td></tr>';
+        document.getElementById('total-votos').textContent = totalVotos;
+        document.getElementById('total-invalidos').textContent = totalInvalidos;
+
+        // ── seção de resultados: escolhe qual painel exibir ──
+        const elVazio = document.getElementById('resultado-vazio');
+        const elAtivo = document.getElementById('resultado-ativo');
+        const elFinal = document.getElementById('resultado-final');
+
+        if (!status.iniciada && !status.aberta) {
+            // Nunca foi iniciada
+            elVazio.style.display = 'flex';
+            elAtivo.style.display = 'none';
+            elFinal.style.display = 'none';
+        } else if (status.aberta) {
+            // Em andamento — apuração ao vivo
+            elVazio.style.display = 'none';
+            elAtivo.style.display = 'block';
+            elFinal.style.display = 'none';
+            renderTabelaResultado('tabela-resultado', normais, especiais, totalValidos);
         } else {
-            tb.innerHTML =
-                normais.map((item, i) => `
-                    <tr>
-                        <td>${i + 1}° Lugar</td>
-                        <td>${capitalize(item.candidato)}</td>
-                        <td class="right">${item.total} Votos</td>
-                    </tr>
-                `).join('') +
-                especiais.map(item => `
-                    <tr>
-                        <td class="dim">—</td>
-                        <td class="dim">${capitalize(item.candidato)}</td>
-                        <td class="right dim">${item.total} Votos</td>
-                    </tr>
-                `).join('');
+            // Encerrada — resultado final
+            elVazio.style.display = 'none';
+            elAtivo.style.display = 'none';
+            elFinal.style.display = 'block';
+            renderWinnerBanner(normais, 'winner-banner');
+            renderTabelaResultado('tabela-resultado-final', normais, especiais, totalValidos);
         }
 
     } catch {
@@ -194,14 +255,6 @@ async function encerrarVotacao() {
     await fetch(API + '/encerrar', { method: 'POST' });
     await fetch(API + '/arquivar', { method: 'POST' });
     carregarVisaoGeral();
-
-    document.getElementById('votacao-text').textContent = 'Votação finalizada. Resultado Final:';
-
-    const winEl = document.getElementById('winner-text-el');
-    if (winnerText) {
-        winEl.textContent = `O ganhador foi: ${capitalize(winnerText.candidato)}, com um total de ${winnerText.total} votos`;
-        winEl.classList.add('show');
-    }
 }
 
 // ─────────────────────────────────────────────
@@ -377,9 +430,16 @@ async function visualizarVotacao(id) {
         const data = await res.json();
 
         document.getElementById('hist-modal-nome').textContent = data.nome || '—';
-        document.getElementById('hist-modal-desc').textContent = data.descricao ? data.descricao : '';
-        document.getElementById('hist-modal-data').textContent =
-            '📅 ' + new Date(data.dataCriacao).toLocaleString('pt-BR');
+
+        const descEl = document.getElementById('hist-modal-desc');
+        descEl.textContent = data.descricao || '';
+        descEl.style.display = data.descricao ? 'block' : 'none';
+
+        // Datas
+        document.getElementById('hist-modal-data-criacao').textContent =
+            data.dataCriacao ? new Date(data.dataCriacao).toLocaleString('pt-BR') : '—';
+        document.getElementById('hist-modal-data-encerramento').textContent =
+            data.dataEncerramento ? new Date(data.dataEncerramento).toLocaleString('pt-BR') : '—';
 
         const tb = document.getElementById('hist-modal-tabela');
         const vazio = document.getElementById('hist-modal-vazio');
@@ -389,24 +449,32 @@ async function visualizarVotacao(id) {
         const especiais = votos.filter(r => ESPECIAIS.includes(r.candidato.toLowerCase()));
         normais.sort((a, b) => b.total - a.total);
 
+        const totalValidos = normais.reduce((s, r) => s + r.total, 0);
+
+        // Banner de vencedor
+        renderWinnerBanner(normais, 'hist-winner-banner');
+
         if (votos.length === 0) {
             tb.innerHTML = '';
             vazio.style.display = 'block';
+            document.getElementById('hist-winner-banner').style.display = 'none';
         } else {
             vazio.style.display = 'none';
             tb.innerHTML =
                 normais.map((item, i) => `
-                    <tr style="border-bottom:1px solid #E8E8E4">
-                        <td style="padding:11px 14px;font-size:0.875rem">${i + 1}° Lugar</td>
-                        <td style="padding:11px 14px;font-size:0.875rem">${capitalize(item.candidato)}</td>
-                        <td style="padding:11px 14px;font-size:0.875rem;text-align:right">${item.total} Votos</td>
+                    <tr style="border-bottom:1px solid var(--border)">
+                        <td style="padding:12px 16px;font-size:0.9rem">${i + 1}° Lugar</td>
+                        <td style="padding:12px 16px;font-size:0.9rem">${capitalize(item.candidato)}</td>
+                        <td style="padding:12px 16px;font-size:0.9rem;text-align:right">${item.total}</td>
+                        <td style="padding:12px 16px;font-size:0.9rem;text-align:right">${calcPct(item.total, totalValidos)}</td>
                     </tr>
                 `).join('') +
                 especiais.map(item => `
-                    <tr style="border-bottom:1px solid #E8E8E4">
-                        <td style="padding:11px 14px;font-size:0.875rem;color:#A0A09A">—</td>
-                        <td style="padding:11px 14px;font-size:0.875rem;color:#A0A09A">${capitalize(item.candidato)}</td>
-                        <td style="padding:11px 14px;font-size:0.875rem;text-align:right;color:#A0A09A">${item.total} Votos</td>
+                    <tr style="border-bottom:1px solid var(--border)">
+                        <td style="padding:12px 16px;font-size:0.9rem;color:var(--muted)">—</td>
+                        <td style="padding:12px 16px;font-size:0.9rem;color:var(--muted)">${capitalize(item.candidato)}</td>
+                        <td style="padding:12px 16px;font-size:0.9rem;text-align:right;color:var(--muted)">${item.total}</td>
+                        <td style="padding:12px 16px;font-size:0.9rem;text-align:right;color:var(--muted)">—</td>
                     </tr>
                 `).join('');
         }

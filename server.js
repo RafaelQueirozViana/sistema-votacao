@@ -84,16 +84,22 @@ async function initDatabase() {
     // Histórico: uma linha por votação encerrada
     await db.exec(`
         CREATE TABLE IF NOT EXISTS historico (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome        TEXT DEFAULT '',
-            descricao   TEXT DEFAULT '',
-            dataCriacao TEXT DEFAULT '',
-            votos       TEXT DEFAULT '[]'
+            id                INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome              TEXT DEFAULT '',
+            descricao         TEXT DEFAULT '',
+            dataCriacao       TEXT DEFAULT '',
+            dataEncerramento  TEXT DEFAULT '',
+            votos             TEXT DEFAULT '[]'
         )
     `);
 
     await db.run(`INSERT OR IGNORE INTO controle (id, iniciada, aberta) VALUES (1, 0, 0)`);
     await db.run(`INSERT OR IGNORE INTO votacao_info (id, nome, descricao, dataCriacao) VALUES (1, '', '', '')`);
+
+    // Migração: adiciona coluna se banco antigo não tiver
+    try {
+        await db.run(`ALTER TABLE historico ADD COLUMN dataEncerramento TEXT DEFAULT ''`);
+    } catch { /* coluna já existe */ };
 
     app.listen(3000, '0.0.0.0', () => {
         console.log('Servidor rodando em http://localhost:3000');
@@ -222,10 +228,11 @@ app.post('/arquivar', async (req, res) => {
 
         // Agrega os votos atuais
         const votos = await db.all('SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato');
+        const dataEncerramento = new Date().toISOString();
 
         await db.run(
-            'INSERT INTO historico (nome, descricao, dataCriacao, votos) VALUES (?, ?, ?, ?)',
-            [info.nome, info.descricao || '', info.dataCriacao || new Date().toISOString(), JSON.stringify(votos)]
+            'INSERT INTO historico (nome, descricao, dataCriacao, dataEncerramento, votos) VALUES (?, ?, ?, ?, ?)',
+            [info.nome, info.descricao || '', info.dataCriacao || dataEncerramento, dataEncerramento, JSON.stringify(votos)]
         );
 
         res.json({ mensagem: 'Votação arquivada!' });
@@ -271,5 +278,6 @@ app.delete('/resetar', async (req, res) => {
     res.json({ mensagem: 'Votação resetada com sucesso!' });
 });
 
+// ─────────────────────────────────────────────
 
 initDatabase();

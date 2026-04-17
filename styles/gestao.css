@@ -43,7 +43,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
   min-height: 100vh;
@@ -525,22 +525,20 @@ body {
 }
 
 .sidebar-nav-label {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: .9rem;
+  font-size: 0.65rem;
   font-weight: 600;
-
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #FFF;
+  color: var(--sb-muted);
   padding: 0 10px;
-  margin-bottom: 15px;
+  margin-bottom: 6px;
   margin-top: 4px;
-
 }
 
 nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 }
 
 .nav-btn {
@@ -551,7 +549,7 @@ nav {
   padding: 10px 12px;
   border-radius: 9px;
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 0.925rem;
   font-weight: 400;
   cursor: pointer;
   transition: background 0.13s, color 0.13s;
@@ -1040,9 +1038,179 @@ td.dim {
   font-weight: 300;
 }
 
+
 /* ════════════════════════════════════════════
-   RESPONSIVIDADE
+   PAINEL DE RESULTADO — estados
 ════════════════════════════════════════════ */
+
+/* estado vazio */
+.resultado-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 56px 24px;
+  margin-top: 8px;
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  gap: 10px;
+}
+
+.resultado-vazio-icon {
+  font-size: 2rem;
+  opacity: 0.4;
+}
+
+.resultado-vazio-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.resultado-vazio-sub {
+  font-size: 0.875rem;
+  color: var(--muted);
+  font-weight: 300;
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* pills de estado */
+.resultado-header-label {
+  margin-bottom: 4px;
+}
+
+.resultado-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+
+.resultado-pill.live {
+  background: var(--green-bg);
+  color: var(--green-fg);
+}
+
+.resultado-pill.final {
+  background: #EAE9F5;
+  color: #4B3FA0;
+}
+
+/* banner do vencedor */
+.winner-banner {
+  display: none;
+}
+
+.winner-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--text);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.winner-banner-inner.empate {
+  background: linear-gradient(135deg, #3B3B6B 0%, #17171A 100%);
+}
+
+.winner-banner-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+}
+
+.winner-banner-nome,
+.winner-banner-nomes {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.winner-banner-votos {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+  font-weight: 300;
+}
+
+/* datas do modal histórico */
+.hist-modal-datas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.hist-modal-data-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.hist-modal-data-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hist-modal-data-val {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hist-modal-data-sep {
+  font-size: 1rem;
+  color: var(--muted-light);
+  flex-shrink: 0;
+  align-self: center;
+  margin-top: 10px;
+}
+
+@media (max-width: 560px) {
+  .winner-banner-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .winner-banner-nome,
+  .winner-banner-nomes {
+    font-size: 1.3rem;
+  }
+
+  .hist-modal-data-sep {
+    display: none;
+  }
+
+  .hist-modal-data-item {
+    min-width: 100%;
+  }
+}
 
 /* tablet largo */
 @media (max-width: 1100px) {

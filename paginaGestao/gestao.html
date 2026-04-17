@@ -79,22 +79,38 @@
                 <div>
                     <h3 id="hist-modal-nome">—</h3>
                     <p class="modal-sub" id="hist-modal-desc" style="margin-bottom:4px"></p>
-                    <p class="modal-sub" id="hist-modal-data" style="margin-bottom:0"></p>
                 </div>
                 <button class="btn-cancelar" onclick="fecharModalHistorico()">✕ Fechar</button>
             </div>
 
-            <div class="modal-divider" style="margin:16px 0 20px"></div>
+            <!-- datas -->
+            <div class="hist-modal-datas">
+                <div class="hist-modal-data-item">
+                    <span class="hist-modal-data-label">Criação</span>
+                    <span class="hist-modal-data-val" id="hist-modal-data-criacao">—</span>
+                </div>
+                <div class="hist-modal-data-sep">→</div>
+                <div class="hist-modal-data-item">
+                    <span class="hist-modal-data-label">Encerramento</span>
+                    <span class="hist-modal-data-val" id="hist-modal-data-encerramento">—</span>
+                </div>
+            </div>
+
+            <div class="modal-divider" style="margin:20px 0"></div>
+
+            <!-- banner do vencedor -->
+            <div id="hist-winner-banner" class="winner-banner" style="margin-bottom:16px"></div>
 
             <p class="modal-label-section">Resultado Final da Votação</p>
 
-            <div style="overflow-x:auto; border:1px solid #E8E8E4; border-radius:10px; margin-top:10px">
+            <div style="overflow-x:auto; border:1px solid var(--border); border-radius:10px; margin-top:10px">
                 <table style="width:100%;border-collapse:collapse">
                     <thead>
                         <tr>
                             <th class="hist-th">Posição</th>
                             <th class="hist-th">Candidato</th>
                             <th class="hist-th" style="text-align:right">Votos</th>
+                            <th class="hist-th" style="text-align:right">% Válidos</th>
                         </tr>
                     </thead>
                     <tbody id="hist-modal-tabela"></tbody>
@@ -102,7 +118,7 @@
             </div>
 
             <p id="hist-modal-vazio"
-                style="display:none;text-align:center;color:#A0A09A;padding:22px;font-size:0.875rem;font-weight:300">
+                style="display:none;text-align:center;color:var(--muted);padding:22px;font-size:0.875rem;font-weight:300">
                 Nenhum voto foi registrado nesta votação.
             </p>
         </div>
@@ -129,16 +145,16 @@
             </div>
 
             <div class="sidebar-nav-section">
-
+                <p class="sidebar-nav-label">Navegação</p>
                 <nav>
                     <button class="nav-btn active" onclick="mostrarAba('visao-geral', this)">
-                        Status da Votação
+                        <span class="nav-icon">📊</span> Status da Votação
                     </button>
                     <button class="nav-btn" onclick="mostrarAba('relatorio', this)">
-                        Relatório de Horários
+                        <span class="nav-icon">📋</span> Relatório de Horários
                     </button>
                     <button class="nav-btn" onclick="mostrarAba('historico', this)">
-                        Histórico de Votações
+                        <span class="nav-icon">🕓</span> Histórico de Votações
                     </button>
                 </nav>
             </div>
@@ -177,24 +193,58 @@
                         <p id="total-votos" class="control-value big">—</p>
                     </div>
                     <div class="control-card">
-                        <p class="control-label">Funcionários que Votaram</p>
-                        <p id="total-votantes" class="control-value big">—</p>
+                        <p class="control-label">Votos Inválidos</p>
+                        <p id="total-invalidos" class="control-value big">—</p>
                     </div>
                 </div>
 
-                <p class="section-title" id="votacao-text">Votos Computados (até o momento)</p>
-                <p class="winner-text" id="winner-text-el"></p>
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Posição</th>
-                                <th>Candidato</th>
-                                <th style="text-align:right">Votos</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-resultado"></tbody>
-                    </table>
+                <!-- Estado: sem votação ativa -->
+                <div id="resultado-vazio" class="resultado-vazio" style="display:none">
+                    <span class="resultado-vazio-icon">🗳</span>
+                    <p class="resultado-vazio-titulo">Aguardando início de uma nova votação</p>
+                    <p class="resultado-vazio-sub">Os votos aparecerão aqui em tempo real assim que uma votação for
+                        iniciada.</p>
+                </div>
+
+                <!-- Estado: apuração em tempo real -->
+                <div id="resultado-ativo" style="display:none">
+                    <div class="resultado-header-label">
+                        <span class="resultado-pill live">● Apuração em Tempo Real</span>
+                    </div>
+                    <div class="card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Candidato</th>
+                                    <th style="text-align:right">Votos</th>
+                                    <th style="text-align:right">% Válidos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-resultado"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Estado: resultado final (votação encerrada) -->
+                <div id="resultado-final" style="display:none">
+                    <div class="resultado-header-label">
+                        <span class="resultado-pill final">✓ Resultado Final Confirmado</span>
+                    </div>
+                    <div id="winner-banner" class="winner-banner"></div>
+                    <div class="card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Candidato</th>
+                                    <th style="text-align:right">Votos</th>
+                                    <th style="text-align:right">% Válidos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-resultado-final"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <p id="timestamp-geral" class="timestamp"></p>
