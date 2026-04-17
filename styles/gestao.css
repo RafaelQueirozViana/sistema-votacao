@@ -364,7 +364,7 @@ body {
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.15s, background 0.15s;
+
 }
 
 .modal-add button:hover {
@@ -405,7 +405,7 @@ body {
 }
 
 .btn-confirmar {
-  background: var(--text);
+  background: black;
   border: none;
   color: #fff;
   padding: 11px 22px;
