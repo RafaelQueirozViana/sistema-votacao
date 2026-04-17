@@ -5,7 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel de Gestão — CIPA</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="../styles/gestao.css" />
+
     <meta name="theme-color" content="#17171A" />
 </head>
 
@@ -138,23 +140,23 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-top">
                 <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon">🗳</div>
-                    <span class="sidebar-brand">Sistema Votos</span>
+
+                    <span class="sidebar-brand">Painel de Gestão</span>
                 </div>
-                <p class="sidebar-tagline">Painel de Gestão</p>
+
             </div>
 
             <div class="sidebar-nav-section">
-                <p class="sidebar-nav-label">Navegação</p>
                 <nav>
                     <button class="nav-btn active" onclick="mostrarAba('visao-geral', this)">
-                        <span class="nav-icon">📊</span> Status da Votação
+                        <span class="material-icons">bar_chart</span>
+                        Status da Votação
                     </button>
                     <button class="nav-btn" onclick="mostrarAba('relatorio', this)">
-                        <span class="nav-icon">📋</span> Relatório de Horários
+                        <span class="material-icons">assignment</span> Relatório de Horários
                     </button>
                     <button class="nav-btn" onclick="mostrarAba('historico', this)">
-                        <span class="nav-icon">🕓</span> Histórico de Votações
+                        <span class="material-icons">history</span> Histórico de Votações
                     </button>
                 </nav>
             </div>
@@ -171,6 +173,9 @@
             <!-- ABA: VISÃO GERAL -->
             <div id="aba-visao-geral" class="aba">
 
+
+
+
                 <div class="page-header">
                     <h2>Visão Geral</h2>
                     <div id="status-badge" class="badge"></div>
@@ -179,21 +184,21 @@
 
                 <div class="control-row">
                     <div class="control-card">
-                        <p class="control-label">Status da Votação</p>
+                        <p class="control-label">Status da Votação:</p>
                         <p id="status-texto" class="control-value">—</p>
                         <div class="control-actions">
-                            <button id="btn-iniciar" class="btn-green" onclick="iniciarVotacao()">Iniciar
+                            <button id="btn-iniciar" class="btn-green" onclick="iniciarVotacao()">Criar
                                 Votação</button>
                             <button id="btn-encerrar" class="btn-red" onclick="encerrarVotacao()">Encerrar
                                 Votação</button>
                         </div>
                     </div>
                     <div class="control-card">
-                        <p class="control-label">Total de Votos</p>
+                        <p class="control-label">Total de Votos:</p>
                         <p id="total-votos" class="control-value big">—</p>
                     </div>
                     <div class="control-card">
-                        <p class="control-label">Votos Inválidos</p>
+                        <p class="control-label">Votos Inválidos:</p>
                         <p id="total-invalidos" class="control-value big">—</p>
                     </div>
                 </div>

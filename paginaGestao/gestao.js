@@ -130,7 +130,7 @@ function renderWinnerBanner(normais, containerId) {
     } else {
         el.innerHTML = `
             <div class="winner-banner-inner">
-                <div class="winner-banner-label">🏆 Vencedor</div>
+                <div class="winner-banner-label">Ganhador DA ELEIÇÃO ( CIPA 2026)</div>
                 <div class="winner-banner-nome">${capitalize(normais[0].candidato)}</div>
                 <div class="winner-banner-votos">${normais[0].total} votos</div>
             </div>`;
@@ -410,7 +410,7 @@ async function carregarHistorico() {
             <div class="hist-card">
                 <div class="hist-card-info">
                     <p class="hist-card-nome">${escapeHtml(v.nome)}</p>
-                    <p class="hist-card-data">📅 ${new Date(v.dataCriacao).toLocaleString('pt-BR')}</p>
+                    <p class="hist-card-data">Criado em: ${new Date(v.dataCriacao).toLocaleString('pt-BR')}</p>
                 </div>
                 <div class="hist-card-actions">
                     <button class="btn-hist-view" onclick="visualizarVotacao(${v.id})">Visualizar</button>
