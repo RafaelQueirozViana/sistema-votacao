@@ -132,7 +132,7 @@ body {
   width: 100%;
   margin-top: 8px;
   padding: 14px;
-  background: var(--text);
+  background: black;
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
@@ -1007,7 +1007,7 @@ td.dim {
 
 .btn-hist-view {
   padding: 9px 18px;
-  background: var(--text);
+  background: black;
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
@@ -1152,7 +1152,7 @@ td.dim {
 }
 
 .winner-banner-inner.empate {
-  background: linear-gradient(135deg, #3B3B6B 0%, #17171A 100%);
+  background: linear-gradient(135deg, #8282e9 0%, #17171A 100%);
 }
 
 .winner-banner-label {
