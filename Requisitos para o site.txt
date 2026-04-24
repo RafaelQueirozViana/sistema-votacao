@@ -12,3 +12,12 @@ Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico 
 Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA" para o nome dinâmico do título da votação
 
 
+
+
+Requisitos Importantes solicitados por Henrique e Allaf
+
+-  um sistema onde quando o funcionário preenche os dados e clica em votar na pagina formulario, a impressora tem que imprimir um cartão com os dados do voto, e as tres assinatura da 
+
+- Criar uma nova guia para cadastro dos RES, onde o Carlos ficará responsável por cadastrar o RE,Nome, Data de nascimento...  Idéia: Fazer a data de nascimento ser a senha
+
+- Adicionar o campo de foto no formulário de votação, onde a foto é tirada pela webcam , ideia: pode aparecer antes de aparecer o formulário 
