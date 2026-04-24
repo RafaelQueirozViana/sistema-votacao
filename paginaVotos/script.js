@@ -1,31 +1,116 @@
 const API = 'http://localhost:3000';
 
 // ─────────────────────────────────────────────
+// ESTADO LOCAL — rastreia o que a página já sabe
+// ─────────────────────────────────────────────
+
+let _estadoAnterior = {
+    aberta: null,      // true | false | null (desconhecido)
+    iniciada: null,    // true | false | null
+};
+
+let _pollingTimer = null;
+const POLLING_INTERVAL = 5000; // 5 segundos
+
+// ─────────────────────────────────────────────
 // INICIALIZAÇÃO
 // ─────────────────────────────────────────────
 
 window.addEventListener('load', async () => {
-    await verificarStatus();
-    await carregarCandidatos();
+    await sincronizarPagina();
+    iniciarPolling();
 });
 
 // ─────────────────────────────────────────────
-// VERIFICAR STATUS DA VOTAÇÃO
+// POLLING
 // ─────────────────────────────────────────────
 
-async function verificarStatus() {
+function iniciarPolling() {
+    pararPolling();
+    _pollingTimer = setInterval(verificarMudancas, POLLING_INTERVAL);
+}
+
+function pararPolling() {
+    if (_pollingTimer) {
+        clearInterval(_pollingTimer);
+        _pollingTimer = null;
+    }
+}
+
+// ─────────────────────────────────────────────
+// VERIFICAÇÃO DE MUDANÇAS (chamada pelo polling)
+// ─────────────────────────────────────────────
+
+async function verificarMudancas() {
     try {
         const res = await fetch(API + '/status');
         const status = await res.json();
 
-        if (!status.aberta) {
-            document.getElementById('mainForm').style.display = 'none';
-            document.getElementById('msg-votacao').style.display = 'block';
-            document.getElementById('msg-votacao').textContent = status.iniciada
+        const abertaMudou = status.aberta !== _estadoAnterior.aberta;
+        const iniciadaMudou = status.iniciada !== _estadoAnterior.iniciada;
+
+        if (abertaMudou || iniciadaMudou) {
+            // Houve mudança de estado — ressincroniza tudo
+            await sincronizarPagina(status);
+        }
+
+    } catch {
+        // Servidor indisponível — ignora silenciosamente, tenta de novo no próximo ciclo
+    }
+}
+
+// ─────────────────────────────────────────────
+// SINCRONIZAÇÃO COMPLETA DA PÁGINA
+// Atualiza UI + candidatos com base no status atual
+// ─────────────────────────────────────────────
+
+async function sincronizarPagina(status = null) {
+    try {
+        // Se o status não foi passado, busca agora
+        if (!status) {
+            const res = await fetch(API + '/status');
+            status = await res.json();
+        }
+
+        // Salva o estado atual para comparação futura
+        _estadoAnterior.aberta = status.aberta;
+        _estadoAnterior.iniciada = status.iniciada;
+
+        if (status.aberta) {
+            // Votação aberta — mostra formulário e carrega candidatos
+            await carregarCandidatos();
+            mostrarFormulario();
+        } else {
+            // Votação fechada ou não iniciada
+            const mensagem = status.iniciada
                 ? 'A votação foi encerrada.'
                 : 'A votação ainda não foi iniciada.';
+            mostrarMensagem(mensagem);
         }
-    } catch { }
+
+    } catch {
+        mostrarMensagem('Não foi possível conectar ao servidor.');
+    }
+}
+
+// ─────────────────────────────────────────────
+// HELPERS DE UI
+// ─────────────────────────────────────────────
+
+function mostrarFormulario() {
+    document.getElementById('mainForm').style.display = 'block';
+    document.getElementById('msg-votacao').style.display = 'none';
+    // Limpa os campos ao exibir um novo formulário
+    document.getElementById('re-funcionario').value = '';
+    document.getElementById('senha').value = '';
+    document.getElementById('voto-input').value = '';
+}
+
+function mostrarMensagem(texto) {
+    document.getElementById('mainForm').style.display = 'none';
+    const msg = document.getElementById('msg-votacao');
+    msg.textContent = texto;
+    msg.style.display = 'block';
 }
 
 // ─────────────────────────────────────────────
@@ -39,6 +124,7 @@ async function carregarCandidatos() {
 
         const select = document.getElementById('voto-input');
 
+        // Remove todas as opções exceto o placeholder
         while (select.options.length > 1) {
             select.remove(1);
         }
@@ -49,6 +135,7 @@ async function carregarCandidatos() {
             option.textContent = item.nome;
             select.appendChild(option);
         });
+
     } catch { }
 }
 
@@ -73,14 +160,12 @@ async function votar() {
 
     const data = await res.json();
 
-    // Voto registrado com sucesso — limpa os campos e mostra confirmação
     if (data.mensagem === 'Voto registrado com sucesso!') {
         document.getElementById('re-funcionario').value = '';
         document.getElementById('senha').value = '';
         document.getElementById('voto-input').value = '';
         mostrarPopup(data.mensagem, 'sucesso');
     } else {
-        // Qualquer outra resposta (já votou, votação fechada...) — popup de aviso
         mostrarPopup(data.mensagem, 'erro');
     }
 }
@@ -98,7 +183,6 @@ function mostrarPopup(mensagem, tipo = 'sucesso') {
     document.getElementById('popup-icone').textContent = tipo === 'sucesso' ? '✓' : '✕';
     popup.style.display = 'flex';
 
-    // Fecha automaticamente após 3 segundos
     setTimeout(() => fecharPopup(), 3000);
 }
 

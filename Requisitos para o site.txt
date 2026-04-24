@@ -1,18 +1,15 @@
 Bugs para corrigir do site:
 
-1- - Adicionar sistema de tempo limite, onde o gestor vai definir o tempo que o formulário ficará aberto 
+Preciso de ajuda para realizar as seguintes manutenções no meu sistema de votação. Abaixo estão os requisitos e as correções necessárias:
+1. Sistema de Tempo Limite (Timeout):
+Na página de criação de votação (Gestão), adicione um campo para o gestor definir um tempo limite (em minutos ou horas) para o formulário permanecer aberto. Implemente a lógica para que o formulário expire automaticamente após esse período.
 
-2- quando clica no botão criar votação, vai na pagina de voto, vota e na pagina de gestao se encerra o voto, 
-o formulario nao atualiza, necessário criar loop na pagina do formulario
+3. Mudança de Título na Gestão:
+No guia Status da votação, onde hoje consta o texto fixo "Resultado Final - ELEIÇÃO CIPA" (resultado-pill final), altere para que exiba dinamicamente o nome da votação ativa ou selecionada.
 
-3 - No texto "Resultado Final - ELEIÇÃO CIPA" fazer aparecer o nome da votação, pois está fixo e falta alterar isso	
+4. Alteração do prompt na Criação:
+Mude o texto do prompt de confirmação ao criar uma nova votação. Atualmente diz: 'Existe uma votação encerrada. Iniciar uma nova irá substituí-la. Deseja continuar?'. Altere para uma abordagem mais direta e amigável, como: 'Deseja criar uma nova votação?'.
 
-4- Arrumar popup de criar nova votação, esta aparecendo barra de scroll quando a tela não está com F11
-
-5 - Mudar o texto da confirmação de quando vai criar nova votação. Em vez de perguntar 
-"Existe uma votação encerrada. Iniciar uma nova irá substituí-la. Deseja continuar?" deve aparecer algo como
-Deseja criar uma nova votação?
-
-6 - Adicionar botão "Ver mais detalhes" no card de winner da votação
-
-
+5. Atalho no Banner de Vencedor (Winner Banner):
+Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
+Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
