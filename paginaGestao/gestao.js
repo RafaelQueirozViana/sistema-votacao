@@ -179,7 +179,7 @@ async function carregarVisaoGeral() {
         const nomePill = document.querySelector('.resultado-pill.final');
         if (nomePill) {
             nomePill.textContent = info.nome
-                ? `Resultado Final — ${info.nome}`
+                ? `Resultado da Última Votação — ${info.nome}`
                 : 'Resultado Final';
         }
 
