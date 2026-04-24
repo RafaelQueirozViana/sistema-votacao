@@ -445,6 +445,8 @@ async function visualizarVotacao(id) {
         const vazio = document.getElementById('hist-modal-vazio');
         const votos = data.votos || [];
 
+        
+
         const normais = votos.filter(r => !ESPECIAIS.includes(r.candidato.toLowerCase()));
         const especiais = votos.filter(r => ESPECIAIS.includes(r.candidato.toLowerCase()));
         normais.sort((a, b) => b.total - a.total);
@@ -505,6 +507,8 @@ async function excluirVotacao(id, btn) {
         btn.textContent = 'Excluir';
     }
 }
+
+
 
 // Utilitário para evitar XSS
 function escapeHtml(str) {

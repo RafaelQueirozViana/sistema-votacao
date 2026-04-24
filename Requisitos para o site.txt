@@ -1,0 +1,18 @@
+Bugs para corrigir do site:
+
+1- - Adicionar sistema de tempo limite, onde o gestor vai definir o tempo que o formulário ficará aberto 
+
+2- quando clica no botão criar votação, vai na pagina de voto, vota e na pagina de gestao se encerra o voto, 
+o formulario nao atualiza, necessário criar loop na pagina do formulario
+
+3 - No texto "Resultado Final - ELEIÇÃO CIPA" fazer aparecer o nome da votação, pois está fixo e falta alterar isso	
+
+4- Arrumar popup de criar nova votação, esta aparecendo barra de scroll quando a tela não está com F11
+
+5 - Mudar o texto da confirmação de quando vai criar nova votação. Em vez de perguntar 
+"Existe uma votação encerrada. Iniciar uma nova irá substituí-la. Deseja continuar?" deve aparecer algo como
+Deseja criar uma nova votação?
+
+6 - Adicionar botão "Ver mais detalhes" no card de winner da votação
+
+

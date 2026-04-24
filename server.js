@@ -280,4 +280,7 @@ app.delete('/resetar', async (req, res) => {
 
 // ─────────────────────────────────────────────
 
+
 initDatabase();
+
+// Analise e interprete esse meu projeto. É um sistema de votação que tem a pagina de formulario e a pagina de votação, onde pela pagina de gestao é possivel criar uma nova votação. Existem varios sistemas envolvendo esse projeto, analise e interprete eles. Depois que voce interpretar vou solicitar para você fazer mudanças e alterações
