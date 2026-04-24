@@ -4,12 +4,9 @@ Preciso de ajuda para realizar as seguintes manutenções no meu sistema de vota
 1. Sistema de Tempo Limite (Timeout):
 Na página de criação de votação (Gestão), adicione um campo para o gestor definir um tempo limite (em minutos ou horas) para o formulário permanecer aberto. Implemente a lógica para que o formulário expire automaticamente após esse período.
 
-3. Mudança de Título na Gestão:
-No guia Status da votação, onde hoje consta o texto fixo "Resultado Final - ELEIÇÃO CIPA" (resultado-pill final), altere para que exiba dinamicamente o nome da votação ativa ou selecionada.
-
-4. Alteração do prompt na Criação:
-Mude o texto do prompt de confirmação ao criar uma nova votação. Atualmente diz: 'Existe uma votação encerrada. Iniciar uma nova irá substituí-la. Deseja continuar?'. Altere para uma abordagem mais direta e amigável, como: 'Deseja criar uma nova votação?'.
-
-5. Atalho no Banner de Vencedor (Winner Banner):
+3. Atalho no Banner de Vencedor (Winner Banner):
 Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
 Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
+
+4. Mudar Título do cabeçaho da página de formulário
+Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA" para o nome dinâmico do título da votação

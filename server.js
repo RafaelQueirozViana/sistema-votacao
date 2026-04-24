@@ -215,6 +215,11 @@ app.get('/relatorio', async (req, res) => {
     res.json(relatorio);
 });
 
+app.get('/votacao-info', async (req, res) => {
+    const info = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
+    res.json(info || { nome: '', descricao: '', dataCriacao: '' });
+});
+
 // ─────────────────────────────────────────────
 // ARQUIVAR → salva votação atual no histórico
 // ─────────────────────────────────────────────

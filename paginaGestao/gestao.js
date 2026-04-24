@@ -165,13 +165,24 @@ function renderTabelaResultado(tbId, normais, especiais, totalValidos) {
 
 async function carregarVisaoGeral() {
     try {
-        const [resStatus, resResultado] = await Promise.all([
+        const [resStatus, resResultado, resInfo] = await Promise.all([
             fetch(API + '/status'),
             fetch(API + '/resultado'),
+            fetch(API + '/votacao-info'),
         ]);
 
         const status = await resStatus.json();
         const resultado = await resResultado.json();
+        const info = await resInfo.json();
+
+
+        const nomePill = document.querySelector('.resultado-pill.final');
+        if (nomePill) {
+            nomePill.textContent = info.nome
+                ? `Resultado Final — ${info.nome}`
+                : 'Resultado Final';
+        }
+
 
         // ── badges e botões ──
         const badge = document.getElementById('status-badge');
@@ -235,6 +246,8 @@ async function carregarVisaoGeral() {
     }
 }
 
+
+
 // ─────────────────────────────────────────────
 // CONTROLES DE VOTAÇÃO
 // ─────────────────────────────────────────────
@@ -244,7 +257,7 @@ async function iniciarVotacao() {
     const status = await resStatus.json();
 
     if (status.iniciada && !status.aberta) {
-        if (!confirm('Existe uma votação encerrada. Iniciar uma nova irá substituí-la. Deseja continuar?')) return;
+        if (!confirm('Deseja criar uma nova votação?')) return;
     }
 
     abrirModal();
@@ -445,7 +458,7 @@ async function visualizarVotacao(id) {
         const vazio = document.getElementById('hist-modal-vazio');
         const votos = data.votos || [];
 
-        
+
 
         const normais = votos.filter(r => !ESPECIAIS.includes(r.candidato.toLowerCase()));
         const especiais = votos.filter(r => ESPECIAIS.includes(r.candidato.toLowerCase()));
