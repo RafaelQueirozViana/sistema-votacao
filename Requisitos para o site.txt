@@ -40,7 +40,7 @@ Prioridade das aprimorações
 
 1 - Criar guia cadastro de funcionarios
 
-2 - 
+2 - Criar o campo foto no formulário de votação, exibindo a foto em tempo real
 
 3 - Criar ou começar a ver a parte de imprimir o cartão com a impressora
 
