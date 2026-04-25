@@ -5,12 +5,12 @@ const API = 'http://localhost:3000';
 // ─────────────────────────────────────────────
 
 let _estadoAnterior = {
-    aberta: null,      // true | false | null (desconhecido)
-    iniciada: null,    // true | false | null
+    aberta: null,
+    iniciada: null,
 };
 
 let _pollingTimer = null;
-const POLLING_INTERVAL = 5000; // 5 segundos
+const POLLING_INTERVAL = 5000;
 
 // ─────────────────────────────────────────────
 // INICIALIZAÇÃO
@@ -50,38 +50,32 @@ async function verificarMudancas() {
         const iniciadaMudou = status.iniciada !== _estadoAnterior.iniciada;
 
         if (abertaMudou || iniciadaMudou) {
-            // Houve mudança de estado — ressincroniza tudo
             await sincronizarPagina(status);
         }
 
     } catch {
-        // Servidor indisponível — ignora silenciosamente, tenta de novo no próximo ciclo
+        // Servidor indisponível — ignora silenciosamente
     }
 }
 
 // ─────────────────────────────────────────────
 // SINCRONIZAÇÃO COMPLETA DA PÁGINA
-// Atualiza UI + candidatos com base no status atual
 // ─────────────────────────────────────────────
 
 async function sincronizarPagina(status = null) {
     try {
-        // Se o status não foi passado, busca agora
         if (!status) {
             const res = await fetch(API + '/status');
             status = await res.json();
         }
 
-        // Salva o estado atual para comparação futura
         _estadoAnterior.aberta = status.aberta;
         _estadoAnterior.iniciada = status.iniciada;
 
         if (status.aberta) {
-            // Votação aberta — mostra formulário e carrega candidatos
             await carregarCandidatos();
             mostrarFormulario();
         } else {
-            // Votação fechada ou não iniciada
             const mensagem = status.iniciada
                 ? 'A votação foi encerrada.'
                 : 'A votação ainda não foi iniciada.';
@@ -100,7 +94,6 @@ async function sincronizarPagina(status = null) {
 function mostrarFormulario() {
     document.getElementById('mainForm').style.display = 'block';
     document.getElementById('msg-votacao').style.display = 'none';
-    // Limpa os campos ao exibir um novo formulário
     document.getElementById('re-funcionario').value = '';
     document.getElementById('senha').value = '';
     document.getElementById('voto-input').value = '';
@@ -124,7 +117,6 @@ async function carregarCandidatos() {
 
         const select = document.getElementById('voto-input');
 
-        // Remove todas as opções exceto o placeholder
         while (select.options.length > 1) {
             select.remove(1);
         }
@@ -140,33 +132,38 @@ async function carregarCandidatos() {
 }
 
 // ─────────────────────────────────────────────
-// REGISTRAR VOTO
+// REGISTRAR VOTO  ← agora envia a senha
 // ─────────────────────────────────────────────
 
 async function votar() {
     const idFuncionario = document.getElementById('re-funcionario').value.trim();
+    const senha = document.getElementById('senha').value.trim();
     const candidato = document.getElementById('voto-input').value;
 
-    if (!idFuncionario || !candidato) {
-        mostrarPopup('Preencha o RE e selecione um candidato.', 'erro');
+    if (!idFuncionario || !senha || !candidato) {
+        mostrarPopup('Preencha todos os campos antes de votar.', 'erro');
         return;
     }
 
-    const res = await fetch(API + '/votar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idFuncionario, candidato })
-    });
+    try {
+        const res = await fetch(API + '/votar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idFuncionario, candidato, senha })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (data.mensagem === 'Voto registrado com sucesso!') {
-        document.getElementById('re-funcionario').value = '';
-        document.getElementById('senha').value = '';
-        document.getElementById('voto-input').value = '';
-        mostrarPopup(data.mensagem, 'sucesso');
-    } else {
-        mostrarPopup(data.mensagem, 'erro');
+        if (data.mensagem === 'Voto registrado com sucesso!') {
+            document.getElementById('re-funcionario').value = '';
+            document.getElementById('senha').value = '';
+            document.getElementById('voto-input').value = '';
+            mostrarPopup(data.mensagem, 'sucesso');
+        } else {
+            mostrarPopup(data.mensagem, 'erro');
+        }
+    } catch {
+        mostrarPopup('Erro de conexão com o servidor.', 'erro');
     }
 }
 
@@ -183,7 +180,7 @@ function mostrarPopup(mensagem, tipo = 'sucesso') {
     document.getElementById('popup-icone').textContent = tipo === 'sucesso' ? '✓' : '✕';
     popup.style.display = 'flex';
 
-    setTimeout(() => fecharPopup(), 3000);
+    setTimeout(() => fecharPopup(), 3500);
 }
 
 function fecharPopup() {

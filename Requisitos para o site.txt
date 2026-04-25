@@ -20,4 +20,28 @@ Requisitos Importantes solicitados por Henrique e Allaf
 
 - Criar uma nova guia para cadastro dos RES, onde o Carlos ficará responsável por cadastrar o RE,Nome, Data de nascimento...  Idéia: Fazer a data de nascimento ser a senha
 
+- Após ter a guia para cadastro dos funcionarios, aprimorar a guia dos horarios, para fazer igual a guia historico de votações, exibindo cada votação em forma de cards como no historico, com a mesma estrutura do html e css, porem exibindo foto, nome, re e horario que votou
+
 - Adicionar o campo de foto no formulário de votação, onde a foto é tirada pela webcam , ideia: pode aparecer antes de aparecer o formulário 
+
+
+Elaboração Ideia de cadastrar RE
+
+
+- O Carlos terá que cadastrar o nome completo, re e data de nascimento
+-Usar data de nascimento como senha do formulario 
+
+
+Agora aplique a seguinte mudança:
+No formulário de votação, os RES validos estão fixos e definidos no javascript, como 1111,2222... Vamos corrigir isso. Para isso,ma tela de gestão, no menu lateral(.sidebar) onde estao guias como Status de votação, historico de votação e relatório de horarios, adicione uma guia Cadastro de Funcionarios. Essa guia vai ser responsavel por permitir adicionar os funcionarios validos manualmente, onde os RES validos serão apenas os cadastrados nessa guia. No caso quando entrar nessa guia de cadastro de funcionario exibirá os funcionarios cadastrados para votar, e aparecerá a opção de adicionar funcionário. Essa opção irá liberar um modal para preencher os seguintes campos para adicionar o funcionário: Nome Completo, RE e Data de Nascimento. Além disso, na pagina de votação, o formulario possui o campo senha, mas nao esta sendo feita nenhuma verificação. Vamos utilizar a data de nascimento como senha válida. Nesse caso entao na hora do funcionario que for votar for preencher o formulario, ele tera que estar cadastrado, e irá colocar seu re e senha( que será os numeros data de nascimento, como 05042003, que seria a data 05/04/2003).
+
+
+Prioridade das aprimorações
+
+1 - Criar guia cadastro de funcionarios
+
+2 - 
+
+3 - Criar ou começar a ver a parte de imprimir o cartão com a impressora
+
+4 - Aprimorar guia de horarios

@@ -97,6 +97,7 @@ function mostrarAba(aba, btn) {
 
     if (aba === 'relatorio') carregarRelatorio();
     if (aba === 'historico') carregarHistorico();
+    if (aba === 'funcionarios') carregarFuncionarios();
 }
 
 // ─────────────────────────────────────────────
@@ -175,7 +176,6 @@ async function carregarVisaoGeral() {
         const resultado = await resResultado.json();
         const info = await resInfo.json();
 
-
         const nomePill = document.querySelector('.resultado-pill.final');
         if (nomePill) {
             nomePill.textContent = info.nome
@@ -183,8 +183,6 @@ async function carregarVisaoGeral() {
                 : 'Resultado Final';
         }
 
-
-        // ── badges e botões ──
         const badge = document.getElementById('status-badge');
         const statusTxt = document.getElementById('status-texto');
         const btnIniciar = document.getElementById('btn-iniciar');
@@ -204,7 +202,6 @@ async function carregarVisaoGeral() {
             btnEnc.disabled = true;
         }
 
-        // ── métricas ──
         const normais = resultado.filter(r => !ESPECIAIS.includes(r.candidato.toLowerCase()));
         const especiais = resultado.filter(r => ESPECIAIS.includes(r.candidato.toLowerCase()));
         normais.sort((a, b) => b.total - a.total);
@@ -216,24 +213,20 @@ async function carregarVisaoGeral() {
         document.getElementById('total-votos').textContent = totalVotos;
         document.getElementById('total-invalidos').textContent = totalInvalidos;
 
-        // ── seção de resultados: escolhe qual painel exibir ──
         const elVazio = document.getElementById('resultado-vazio');
         const elAtivo = document.getElementById('resultado-ativo');
         const elFinal = document.getElementById('resultado-final');
 
         if (!status.iniciada && !status.aberta) {
-            // Nunca foi iniciada
             elVazio.style.display = 'flex';
             elAtivo.style.display = 'none';
             elFinal.style.display = 'none';
         } else if (status.aberta) {
-            // Em andamento — apuração ao vivo
             elVazio.style.display = 'none';
             elAtivo.style.display = 'block';
             elFinal.style.display = 'none';
             renderTabelaResultado('tabela-resultado', normais, especiais, totalValidos);
         } else {
-            // Encerrada — resultado final
             elVazio.style.display = 'none';
             elAtivo.style.display = 'none';
             elFinal.style.display = 'block';
@@ -245,8 +238,6 @@ async function carregarVisaoGeral() {
         alert('Erro ao carregar dados do servidor.');
     }
 }
-
-
 
 // ─────────────────────────────────────────────
 // CONTROLES DE VOTAÇÃO
@@ -284,7 +275,6 @@ function abrirModal() {
     document.getElementById('input-desc-votacao').value = '';
     document.getElementById('modal-erro').textContent = '';
 
-    // Preenche a data atual automaticamente
     const agora = new Date();
     document.getElementById('input-data-votacao').value =
         agora.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
@@ -334,7 +324,6 @@ function renderizarListaModal() {
 
 document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && document.getElementById('modal-overlay').style.display !== 'none') {
-        // Se o foco está no campo de candidato, adiciona candidato
         if (document.activeElement === document.getElementById('input-candidato')) {
             adicionarCandidato();
         }
@@ -349,24 +338,20 @@ async function confirmarInicio() {
     if (!nome) { erro.textContent = 'Informe o nome da votação.'; document.getElementById('input-nome-votacao').focus(); return; }
     if (candidatosModal.length === 0) { erro.textContent = 'Adicione ao menos um candidato.'; return; }
 
-    // Reseta para a nova votação
     await fetch(API + '/resetar', { method: 'DELETE' });
 
-    // Salva metadados da nova votação
     await fetch(API + '/votacao-info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome, descricao: desc })
     });
 
-    // Salva candidatos
     await fetch(API + '/candidatos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ candidatos: candidatosModal })
     });
 
-    // Inicia a votação
     await fetch(API + '/iniciar', { method: 'POST' });
 
     fecharModal();
@@ -448,7 +433,6 @@ async function visualizarVotacao(id) {
         descEl.textContent = data.descricao || '';
         descEl.style.display = data.descricao ? 'block' : 'none';
 
-        // Datas
         document.getElementById('hist-modal-data-criacao').textContent =
             data.dataCriacao ? new Date(data.dataCriacao).toLocaleString('pt-BR') : '—';
         document.getElementById('hist-modal-data-encerramento').textContent =
@@ -458,15 +442,12 @@ async function visualizarVotacao(id) {
         const vazio = document.getElementById('hist-modal-vazio');
         const votos = data.votos || [];
 
-
-
         const normais = votos.filter(r => !ESPECIAIS.includes(r.candidato.toLowerCase()));
         const especiais = votos.filter(r => ESPECIAIS.includes(r.candidato.toLowerCase()));
         normais.sort((a, b) => b.total - a.total);
 
         const totalValidos = normais.reduce((s, r) => s + r.total, 0);
 
-        // Banner de vencedor
         renderWinnerBanner(normais, 'hist-winner-banner');
 
         if (votos.length === 0) {
@@ -521,9 +502,162 @@ async function excluirVotacao(id, btn) {
     }
 }
 
+// ─────────────────────────────────────────────
+// CADASTRO DE FUNCIONÁRIOS
+// ─────────────────────────────────────────────
 
+async function carregarFuncionarios() {
+    const lista = document.getElementById('funcionarios-lista');
+    lista.innerHTML = '<p class="hist-loading">Carregando...</p>';
 
-// Utilitário para evitar XSS
+    try {
+        const res = await fetch(API + '/funcionarios');
+        const data = await res.json();
+
+        if (!data || data.length === 0) {
+            lista.innerHTML = `
+                <div class="func-vazio">
+                    <span class="func-vazio-icon">👥</span>
+                    <p class="func-vazio-titulo">Nenhum funcionário cadastrado</p>
+                    <p class="func-vazio-sub">Adicione funcionários para liberar o acesso à votação.</p>
+                </div>`;
+            return;
+        }
+
+        lista.innerHTML = `
+            <div style="overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);">
+                <table style="width:100%;border-collapse:collapse;background:var(--surface)">
+                    <thead>
+                        <tr>
+                            <th class="func-th">Nome</th>
+                            <th class="func-th">RE</th>
+                            <th class="func-th">Data de Nascimento</th>
+                            <th class="func-th" style="text-align:right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(f => `
+                            <tr class="func-row">
+                                <td class="func-td">${escapeHtml(f.nome)}</td>
+                                <td class="func-td func-re">${escapeHtml(f.re)}</td>
+                                <td class="func-td func-nasc">${formatarDataNasc(f.dataNascimento)}</td>
+                                <td class="func-td" style="text-align:right">
+                                    <button class="btn-func-del" onclick="excluirFuncionario(${f.id}, this)">Excluir</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <p class="func-count">${data.length} funcionário${data.length !== 1 ? 's' : ''} cadastrado${data.length !== 1 ? 's' : ''}</p>
+        `;
+
+    } catch {
+        lista.innerHTML = '<p class="hist-loading" style="color:#c0392b">Erro ao carregar funcionários.</p>';
+    }
+}
+
+// formata DDMMAAAA → DD/MM/AAAA
+function formatarDataNasc(raw) {
+    if (!raw || raw.length !== 8) return raw || '—';
+    return `${raw.slice(0, 2)}/${raw.slice(2, 4)}/${raw.slice(4)}`;
+}
+
+function abrirModalFuncionario() {
+    document.getElementById('input-func-nome').value = '';
+    document.getElementById('input-func-re').value = '';
+    document.getElementById('input-func-nasc').value = '';
+    document.getElementById('modal-func-erro').textContent = '';
+    document.getElementById('modal-func-overlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('input-func-nome').focus(), 100);
+}
+
+function fecharModalFuncionario() {
+    document.getElementById('modal-func-overlay').style.display = 'none';
+}
+
+// Máscara automática: converte DD/MM/AAAA → DDMMAAAA ao salvar
+// e mostra visualmente como DD/MM/AAAA enquanto digita
+document.addEventListener('DOMContentLoaded', () => {
+    const inputNasc = document.getElementById('input-func-nasc');
+    if (inputNasc) {
+        inputNasc.addEventListener('input', e => {
+            let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+            if (v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
+            else if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+            e.target.value = v;
+        });
+    }
+});
+
+async function salvarFuncionario() {
+    const erro = document.getElementById('modal-func-erro');
+    const nome = document.getElementById('input-func-nome').value.trim();
+    const re = document.getElementById('input-func-re').value.trim();
+    const nascRaw = document.getElementById('input-func-nasc').value.trim();
+
+    // Remove separadores para salvar só dígitos
+    const nascDigitos = nascRaw.replace(/\D/g, '');
+
+    erro.textContent = '';
+
+    if (!nome) { erro.textContent = 'Informe o nome completo.'; return; }
+    if (!re) { erro.textContent = 'Informe o RE.'; return; }
+    if (nascDigitos.length !== 8) { erro.textContent = 'Informe a data de nascimento completa (DD/MM/AAAA).'; return; }
+
+    const btnSalvar = document.getElementById('btn-salvar-func');
+    btnSalvar.disabled = true;
+    btnSalvar.textContent = 'Salvando...';
+
+    try {
+        const res = await fetch(API + '/funcionarios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, re, dataNascimento: nascDigitos })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            fecharModalFuncionario();
+            carregarFuncionarios();
+        } else {
+            erro.textContent = data.mensagem || 'Erro ao cadastrar.';
+        }
+    } catch {
+        erro.textContent = 'Não foi possível conectar ao servidor.';
+    } finally {
+        btnSalvar.disabled = false;
+        btnSalvar.textContent = 'Cadastrar';
+    }
+}
+
+async function excluirFuncionario(id, btn) {
+    if (!confirm('Tem certeza que deseja excluir este funcionário? Ele não poderá mais votar.')) return;
+
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+        await fetch(API + '/funcionarios/' + id, { method: 'DELETE' });
+        carregarFuncionarios();
+    } catch {
+        alert('Erro ao excluir funcionário.');
+        btn.disabled = false;
+        btn.textContent = 'Excluir';
+    }
+}
+
+// Fecha modal de funcionário com Enter no último campo
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        fecharModalFuncionario();
+    }
+});
+
+// ─────────────────────────────────────────────
+// UTILITÁRIOS
+// ─────────────────────────────────────────────
+
 function escapeHtml(str) {
     return String(str)
         .replace(/&/g, '&amp;')

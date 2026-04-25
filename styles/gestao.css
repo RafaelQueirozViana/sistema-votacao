@@ -1222,6 +1222,183 @@ td.dim {
   margin-top: 10px;
 }
 
+/* ════════════════════════════════════════════
+   CADASTRO DE FUNCIONÁRIOS
+════════════════════════════════════════════ */
+
+.btn-add-func {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: black;
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-family: var(--font-body);
+    font-size: 0.825rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.btn-add-func:hover {
+    opacity: 0.82;
+}
+
+.func-subtitle {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 4px;
+    line-height: 1.6;
+}
+
+/* tabela de funcionários */
+.func-th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.func-row {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+}
+
+.func-row:last-child {
+    border-bottom: none;
+}
+
+.func-row:hover {
+    background: #FAFAF6;
+}
+
+.func-td {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.func-re {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+}
+
+.func-nasc {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.btn-func-del {
+    padding: 7px 14px;
+    background: transparent;
+    color: var(--red-fg);
+    border: 1px solid #EEBCBC;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.13s, border-color 0.13s;
+    white-space: nowrap;
+}
+
+.btn-func-del:hover {
+    background: var(--red-bg);
+    border-color: #DDA0A0;
+}
+
+.btn-func-del:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.func-count {
+    font-size: 0.78rem;
+    color: var(--muted-light);
+    font-weight: 300;
+    text-align: right;
+    margin-top: 10px;
+}
+
+/* estado vazio de funcionários */
+.func-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 64px 24px;
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.func-vazio-icon {
+    font-size: 2rem;
+    opacity: 0.4;
+}
+
+.func-vazio-titulo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.func-vazio-sub {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 340px;
+    line-height: 1.6;
+}
+
+/* hint dentro do label do modal */
+.modal-field-hint {
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0;
+    text-transform: none;
+    margin-left: 4px;
+}
+
+/* ajuste btn-refresh quando btn-add-func está presente */
+.page-header .btn-add-func + .btn-refresh {
+    margin-left: 0;
+}
+
+/* mobile: empilha botões do header de funcionários */
+@media (max-width: 560px) {
+    .btn-add-func {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .page-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 14px 20px;
+        gap: 10px;
+    }
+}
+
 @media (max-width: 560px) {
   .winner-banner-inner {
     flex-direction: column;

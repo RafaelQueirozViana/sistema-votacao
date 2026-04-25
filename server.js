@@ -8,8 +8,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const RE_VALIDOS = ['11111', '22222', '33333', '44444'];
-
 // ─────────────────────────────────────────────
 // MIDDLEWARE: bloqueia a página de resultado se votação não iniciada
 // ─────────────────────────────────────────────
@@ -93,13 +91,23 @@ async function initDatabase() {
         )
     `);
 
+    // ── NOVO: Tabela de funcionários cadastrados ──
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS funcionarios (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome            TEXT NOT NULL,
+            re              TEXT NOT NULL UNIQUE,
+            dataNascimento  TEXT NOT NULL
+        )
+    `);
+
     await db.run(`INSERT OR IGNORE INTO controle (id, iniciada, aberta) VALUES (1, 0, 0)`);
     await db.run(`INSERT OR IGNORE INTO votacao_info (id, nome, descricao, dataCriacao) VALUES (1, '', '', '')`);
 
     // Migração: adiciona coluna se banco antigo não tiver
     try {
         await db.run(`ALTER TABLE historico ADD COLUMN dataEncerramento TEXT DEFAULT ''`);
-    } catch { /* coluna já existe */ };
+    } catch { /* coluna já existe */ }
 
     app.listen(3000, '0.0.0.0', () => {
         console.log('Servidor rodando em http://localhost:3000');
@@ -180,23 +188,104 @@ app.get('/candidatos', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// VOTOS
+// FUNCIONÁRIOS
+// ─────────────────────────────────────────────
+
+// Listar todos os funcionários
+app.get('/funcionarios', async (req, res) => {
+    try {
+        const rows = await db.all('SELECT id, nome, re, dataNascimento FROM funcionarios ORDER BY nome ASC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao listar funcionários.' });
+    }
+});
+
+// Cadastrar funcionário
+app.post('/funcionarios', async (req, res) => {
+    const { nome, re, dataNascimento } = req.body;
+
+    if (!nome || !re || !dataNascimento) {
+        return res.status(400).json({ ok: false, mensagem: 'Preencha todos os campos.' });
+    }
+
+    // RE deve ser numérico
+    if (!/^\d+$/.test(re.trim())) {
+        return res.status(400).json({ ok: false, mensagem: 'O RE deve conter apenas números.' });
+    }
+
+    // dataNascimento deve ser 8 dígitos numéricos (DDMMAAAA)
+    if (!/^\d{8}$/.test(dataNascimento.trim())) {
+        return res.status(400).json({ ok: false, mensagem: 'Data de nascimento inválida. Use o formato DDMMAAAA.' });
+    }
+
+    try {
+        await db.run(
+            'INSERT INTO funcionarios (nome, re, dataNascimento) VALUES (?, ?, ?)',
+            [nome.trim(), re.trim(), dataNascimento.trim()]
+        );
+        res.json({ ok: true, mensagem: 'Funcionário cadastrado com sucesso!' });
+    } catch (err) {
+        if (err.message.includes('UNIQUE')) {
+            return res.status(409).json({ ok: false, mensagem: 'Já existe um funcionário com este RE.' });
+        }
+        res.status(500).json({ ok: false, mensagem: 'Erro ao cadastrar funcionário.' });
+    }
+});
+
+// Excluir funcionário
+app.delete('/funcionarios/:id', async (req, res) => {
+    try {
+        await db.run('DELETE FROM funcionarios WHERE id = ?', [req.params.id]);
+        res.json({ ok: true, mensagem: 'Funcionário removido.' });
+    } catch {
+        res.status(500).json({ ok: false, mensagem: 'Erro ao remover funcionário.' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// VOTOS  ← agora valida contra tabela funcionarios
 // ─────────────────────────────────────────────
 
 app.post('/votar', async (req, res) => {
-    const { idFuncionario, candidato } = req.body;
+    const { idFuncionario, candidato, senha } = req.body;
 
-    if (!idFuncionario || !candidato) return res.json({ mensagem: 'Preencha todos os campos.' });
-    if (!RE_VALIDOS.includes(String(idFuncionario).trim())) return res.json({ mensagem: 'RE não autorizado. Verifique seu número de registro.' });
+    if (!idFuncionario || !candidato) {
+        return res.json({ mensagem: 'Preencha todos os campos.' });
+    }
 
     const status = await getStatus();
-    if (!status.aberta) return res.json({ mensagem: 'A votação não está aberta no momento.' });
+    if (!status.aberta) {
+        return res.json({ mensagem: 'A votação não está aberta no momento.' });
+    }
 
+    // Busca funcionário pelo RE
+    const funcionario = await db.get(
+        'SELECT * FROM funcionarios WHERE re = ?',
+        [String(idFuncionario).trim()]
+    );
+
+    if (!funcionario) {
+        return res.json({ mensagem: 'RE não autorizado. Verifique seu número de registro.' });
+    }
+
+    // Valida senha (data de nascimento apenas com dígitos)
+    const senhaDigitada = String(senha || '').replace(/\D/g, '');
+    if (senhaDigitada !== funcionario.dataNascimento) {
+        return res.json({ mensagem: 'Senha incorreta. Use sua data de nascimento (apenas números).' });
+    }
+
+    // Verifica duplicidade de voto
     const jaVotou = await db.get('SELECT * FROM votos WHERE idFuncionario = ?', [idFuncionario]);
-    if (jaVotou) return res.json({ mensagem: 'Você já votou!' });
+    if (jaVotou) {
+        return res.json({ mensagem: 'Você já votou!' });
+    }
 
     const dataHora = new Date().toISOString();
-    await db.run('INSERT INTO votos (idFuncionario, candidato, dataHora) VALUES (?, ?, ?)', [idFuncionario, candidato, dataHora]);
+    await db.run(
+        'INSERT INTO votos (idFuncionario, candidato, dataHora) VALUES (?, ?, ?)',
+        [idFuncionario, candidato, dataHora]
+    );
     res.json({ mensagem: 'Voto registrado com sucesso!' });
 });
 
@@ -228,10 +317,8 @@ app.post('/arquivar', async (req, res) => {
     try {
         const info = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
 
-        // Só arquiva se havia uma votação com nome preenchido
         if (!info || !info.nome) return res.json({ mensagem: 'Nada para arquivar.' });
 
-        // Agrega os votos atuais
         const votos = await db.all('SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato');
         const dataEncerramento = new Date().toISOString();
 
@@ -248,16 +335,14 @@ app.post('/arquivar', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// HISTÓRICO — listagem e detalhe
+// HISTÓRICO
 // ─────────────────────────────────────────────
 
-// Lista todas as votações arquivadas (mais recentes primeiro)
 app.get('/historico', async (req, res) => {
     const rows = await db.all('SELECT id, nome, descricao, dataCriacao FROM historico ORDER BY id DESC');
     res.json(rows);
 });
 
-// Detalhe de uma votação específica
 app.get('/historico/:id', async (req, res) => {
     const row = await db.get('SELECT * FROM historico WHERE id = ?', [req.params.id]);
     if (!row) return res.status(404).json({ erro: 'Não encontrado.' });
@@ -265,7 +350,6 @@ app.get('/historico/:id', async (req, res) => {
     res.json(row);
 });
 
-// Excluir uma votação do histórico
 app.delete('/historico/:id', async (req, res) => {
     await db.run('DELETE FROM historico WHERE id = ?', [req.params.id]);
     res.json({ mensagem: 'Excluído!' });
@@ -285,7 +369,4 @@ app.delete('/resetar', async (req, res) => {
 
 // ─────────────────────────────────────────────
 
-
 initDatabase();
-
-// Analise e interprete esse meu projeto. É um sistema de votação que tem a pagina de formulario e a pagina de votação, onde pela pagina de gestao é possivel criar uma nova votação. Existem varios sistemas envolvendo esse projeto, analise e interprete eles (utilizei uma imagem mostrando a estrutura das pastas do projeto). Depois que voce interpretar Vou solicitar para você fazer mudanças e alterações
