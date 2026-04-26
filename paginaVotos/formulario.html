@@ -111,7 +111,22 @@
         </div>
     </div>
 
-    <!-- Popup de feedback -->
+    <!-- ─── ETAPA 3: SUCESSO ────────────────────────────────── -->
+    <div id="tela-sucesso" style="display:none">
+        <div class="card sucesso-card">
+            <div class="sucesso-icone-wrap">
+                <div class="sucesso-icone">✓</div>
+            </div>
+            <h1 class="sucesso-titulo">Voto Computado!</h1>
+            <p class="sucesso-sub">Seu voto foi registrado com sucesso.<br>Obrigado por participar da eleição.</p>
+            <div class="sucesso-divisor"></div>
+            <button class="btn sucesso-btn-voltar" onclick="voltarParaFormulario()">
+                ← Próximo Votante
+            </button>
+        </div>
+    </div>
+
+    <!-- Popup de feedback (apenas para erros agora) -->
     <div id="popup" class="popup">
         <span class="popup-icon" id="popup-icone"></span>
         <span id="popup-texto"></span>

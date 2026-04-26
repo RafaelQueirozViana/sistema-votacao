@@ -257,16 +257,59 @@ async function votar() {
         const data = await res.json();
 
         if (data.mensagem === 'Voto registrado com sucesso!') {
-            document.getElementById('re-funcionario').value = '';
-            document.getElementById('senha').value          = '';
-            document.getElementById('voto-input').value     = '';
-            mostrarPopup(data.mensagem, 'sucesso');
+            mostrarTelaSucesso();
         } else {
             mostrarPopup(data.mensagem, 'erro');
         }
     } catch {
         mostrarPopup('Erro de conexão com o servidor.', 'erro');
     }
+}
+
+function mostrarTelaSucesso() {
+    const telaFormulario = document.getElementById('tela-formulario');
+    const telaSucesso    = document.getElementById('tela-sucesso');
+
+    telaFormulario.classList.add('saindo');
+    setTimeout(() => {
+        telaFormulario.style.display = 'none';
+        telaFormulario.classList.remove('saindo');
+        telaSucesso.style.display = 'flex';
+        telaSucesso.classList.add('entrando');
+        setTimeout(() => telaSucesso.classList.remove('entrando'), 400);
+    }, 280);
+}
+
+function voltarParaFormulario() {
+    // Limpa estado da foto e campos
+    _fotoBase64 = null;
+    document.getElementById('re-funcionario').value = '';
+    document.getElementById('senha').value          = '';
+    document.getElementById('voto-input').value     = '';
+
+    // Reseta a câmera para o próximo votante
+    const telaSucesso = document.getElementById('tela-sucesso');
+    const telaCamera  = document.getElementById('tela-camera');
+
+    telaSucesso.classList.add('saindo');
+    setTimeout(() => {
+        telaSucesso.style.display = 'none';
+        telaSucesso.classList.remove('saindo');
+
+        // Reseta estado interno da câmera
+        document.getElementById('camera-preview').style.display = 'none';
+        document.getElementById('camera-live').style.display    = 'flex';
+        const btnFoto = document.getElementById('btn-foto');
+        btnFoto.disabled = true;
+        btnFoto.classList.remove('pronto');
+        document.getElementById('camera-instrucao').textContent = 'Aguardando câmera…';
+
+        telaCamera.style.display = 'flex';
+        telaCamera.classList.add('entrando');
+        setTimeout(() => telaCamera.classList.remove('entrando'), 400);
+
+        iniciarCamera();
+    }, 280);
 }
 
 // ─────────────────────────────────────────────

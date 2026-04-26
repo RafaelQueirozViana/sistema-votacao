@@ -306,7 +306,8 @@ body {
     animation: fadeOutUp 0.28s ease forwards;
 }
 
-#tela-formulario {
+#tela-formulario,
+#tela-sucesso {
     width: 100%;
     display: flex;
     align-items: center;
@@ -315,6 +316,69 @@ body {
 
 .entrando {
     animation: fadeInUp 0.4s ease both;
+}
+
+/* ════════════════════════════════════════════
+   TELA DE SUCESSO
+════════════════════════════════════════════ */
+
+.sucesso-card {
+    text-align: center;
+    padding: 48px 36px 40px;
+}
+
+.sucesso-icone-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.sucesso-icone {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--green-bg);
+    border: 2px solid var(--green-border);
+    color: var(--green-fg);
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.sucesso-titulo {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.1;
+}
+
+.sucesso-sub {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.65;
+    margin-bottom: 0;
+}
+
+.sucesso-divisor {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+}
+
+.sucesso-btn-voltar {
+    margin-top: 0;
+    background: var(--text);
 }
 
 /* ════════════════════════════════════════════

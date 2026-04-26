@@ -1,4 +1,24 @@
-Bugs para corrigir do site:
+Requisitos Importantes solicitados por Henrique e Allaf
+
+-  um sistema onde quando o funcionário preenche os dados e clica em votar na pagina formulario, a impressora tem que imprimir um cartão com os dados do voto, e as tres assinatura da CIPA
+
+
+
+
+
+
+Funcionalidades e mini ajustes necessarios para fazer:
+
+
+- Criar ou começar a ver a parte de imprimir o cartão com a impressora
+- Aprimorar a guia dos horarios, para fazer igual a guia historico de votações, exibindo cada votação em forma de cards como no historico, porem exibindo foto, nome, re e horario que votou
+- Nessa nova tela que informa que o voto foi computado, está acontecendo o bug de quando clica no botão "proximo votante", ele exibe a parte de identificação por foto novamente, porem quase na mesma hora some, ficando a tela em branco, só voltando ao normal quando recarrega a pagina
+
+- Limitar o numero maximo de caracteres para 5 no campo RE do registro de funcionario na pagina da gestao
+- Não permitir usar ponto no campo de RE do formulário de votação
+- Apagar o placeholder do campo senha do formulário de votações ou mudar a bolinha para outro texto
+
+Além disso, tem todas essas funcionalidades que precisam funcionar:
 
 Preciso de ajuda para realizar as seguintes manutenções no meu sistema de votação. Abaixo estão os requisitos e as correções necessárias:
 1. Sistema de Tempo Limite (Timeout):
@@ -10,38 +30,3 @@ Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico 
 
 4. Mudar Título do cabeçaho da página de formulário
 Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA" para o nome dinâmico do título da votação
-
-
-
-
-Requisitos Importantes solicitados por Henrique e Allaf
-
--  um sistema onde quando o funcionário preenche os dados e clica em votar na pagina formulario, a impressora tem que imprimir um cartão com os dados do voto, e as tres assinatura da 
-
-- Criar uma nova guia para cadastro dos RES, onde o Carlos ficará responsável por cadastrar o RE,Nome, Data de nascimento...  Idéia: Fazer a data de nascimento ser a senha
-
-- Após ter a guia para cadastro dos funcionarios, aprimorar a guia dos horarios, para fazer igual a guia historico de votações, exibindo cada votação em forma de cards como no historico, com a mesma estrutura do html e css, porem exibindo foto, nome, re e horario que votou
-
-- Adicionar o campo de foto no formulário de votação, onde a foto é tirada pela webcam , ideia: pode aparecer antes de aparecer o formulário 
-
-
-Elaboração Ideia de cadastrar RE
-
-
-- O Carlos terá que cadastrar o nome completo, re e data de nascimento
--Usar data de nascimento como senha do formulario 
-
-
-Agora aplique a seguinte mudança:
-No formulário de votação, os RES validos estão fixos e definidos no javascript, como 1111,2222... Vamos corrigir isso. Para isso,ma tela de gestão, no menu lateral(.sidebar) onde estao guias como Status de votação, historico de votação e relatório de horarios, adicione uma guia Cadastro de Funcionarios. Essa guia vai ser responsavel por permitir adicionar os funcionarios validos manualmente, onde os RES validos serão apenas os cadastrados nessa guia. No caso quando entrar nessa guia de cadastro de funcionario exibirá os funcionarios cadastrados para votar, e aparecerá a opção de adicionar funcionário. Essa opção irá liberar um modal para preencher os seguintes campos para adicionar o funcionário: Nome Completo, RE e Data de Nascimento. Além disso, na pagina de votação, o formulario possui o campo senha, mas nao esta sendo feita nenhuma verificação. Vamos utilizar a data de nascimento como senha válida. Nesse caso entao na hora do funcionario que for votar for preencher o formulario, ele tera que estar cadastrado, e irá colocar seu re e senha( que será os numeros data de nascimento, como 05042003, que seria a data 05/04/2003).
-
-
-Prioridade das aprimorações
-
-1 - Criar guia cadastro de funcionarios
-
-2 - Criar o campo foto no formulário de votação, exibindo a foto em tempo real
-
-3 - Criar ou começar a ver a parte de imprimir o cartão com a impressora
-
-4 - Aprimorar guia de horarios
