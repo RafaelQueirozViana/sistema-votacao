@@ -29,6 +29,17 @@ async function iniciarCamera() {
     const btnFoto   = document.getElementById('btn-foto');
     const erroEl    = document.getElementById('camera-erro');
     const liveEl    = document.getElementById('camera-live');
+    const video     = document.getElementById('video');
+
+    // Remove qualquer stream anterior antes de abrir um novo
+    if (_stream) {
+        _stream.getTracks().forEach(t => t.stop());
+        _stream = null;
+    }
+
+    // Remove listener anterior para não acumular callbacks
+    const novoVideo = video.cloneNode(true);
+    video.parentNode.replaceChild(novoVideo, video);
 
     try {
         _stream = await navigator.mediaDevices.getUserMedia({
@@ -36,10 +47,9 @@ async function iniciarCamera() {
             audio: false
         });
 
-        const video = document.getElementById('video');
-        video.srcObject = _stream;
+        novoVideo.srcObject = _stream;
 
-        video.addEventListener('loadedmetadata', () => {
+        novoVideo.addEventListener('loadedmetadata', () => {
             instrucao.textContent = 'Câmera pronta. Posicione seu rosto e capture.';
             btnFoto.disabled = false;
             btnFoto.classList.add('pronto');
@@ -73,15 +83,12 @@ function tirarFoto() {
     canvas.height = video.videoHeight || 480;
 
     const ctx = canvas.getContext('2d');
-
-    // Espelha horizontalmente — efeito espelho natural para selfie
     ctx.save();
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    // Guarda como base64 para envio futuro junto com os dados do voto
     _fotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
     document.getElementById('camera-live').style.display    = 'none';
@@ -281,35 +288,31 @@ function mostrarTelaSucesso() {
 }
 
 function voltarParaFormulario() {
-    // Limpa estado da foto e campos
     _fotoBase64 = null;
     document.getElementById('re-funcionario').value = '';
     document.getElementById('senha').value          = '';
     document.getElementById('voto-input').value     = '';
 
-    // Reseta a câmera para o próximo votante
     const telaSucesso = document.getElementById('tela-sucesso');
     const telaCamera  = document.getElementById('tela-camera');
 
-    telaSucesso.classList.add('saindo');
-    setTimeout(() => {
-        telaSucesso.style.display = 'none';
-        telaSucesso.classList.remove('saindo');
+    // Esconde sucesso sem animação para evitar conflito com entrando da câmera
+    telaSucesso.style.display = 'none';
 
-        // Reseta estado interno da câmera
-        document.getElementById('camera-preview').style.display = 'none';
-        document.getElementById('camera-live').style.display    = 'flex';
-        const btnFoto = document.getElementById('btn-foto');
-        btnFoto.disabled = true;
-        btnFoto.classList.remove('pronto');
-        document.getElementById('camera-instrucao').textContent = 'Aguardando câmera…';
+    // Garante que não há classes de animação residuais na tela de câmera
+    telaCamera.classList.remove('saindo', 'entrando');
 
-        telaCamera.style.display = 'flex';
-        telaCamera.classList.add('entrando');
-        setTimeout(() => telaCamera.classList.remove('entrando'), 400);
+    // Reseta UI interna da câmera
+    document.getElementById('camera-preview').style.display = 'none';
+    document.getElementById('camera-live').style.display    = 'flex';
+    const btnFoto = document.getElementById('btn-foto');
+    btnFoto.disabled = true;
+    btnFoto.classList.remove('pronto');
+    document.getElementById('camera-instrucao').textContent = 'Aguardando câmera…';
 
-        iniciarCamera();
-    }, 280);
+    // Mostra tela de câmera e inicia stream
+    telaCamera.style.display = 'flex';
+    iniciarCamera();
 }
 
 // ─────────────────────────────────────────────

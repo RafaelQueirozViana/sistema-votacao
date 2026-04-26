@@ -4,9 +4,6 @@ Requisitos Importantes solicitados por Henrique e Allaf
 
 
 
-
-
-
 Funcionalidades e mini ajustes necessarios para fazer:
 
 
