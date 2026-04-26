@@ -9,7 +9,6 @@ Funcionalidades e mini ajustes necessarios para fazer:
 
 - Criar ou começar a ver a parte de imprimir o cartão com a impressora
 - Aprimorar a guia dos horarios, para fazer igual a guia historico de votações, exibindo cada votação em forma de cards como no historico, porem exibindo foto, nome, re e horario que votou
-- Nessa nova tela que informa que o voto foi computado, está acontecendo o bug de quando clica no botão "proximo votante", ele exibe a parte de identificação por foto novamente, porem quase na mesma hora some, ficando a tela em branco, só voltando ao normal quando recarrega a pagina
 
 - Limitar o numero maximo de caracteres para 5 no campo RE do registro de funcionario na pagina da gestao
 - Não permitir usar ponto no campo de RE do formulário de votação
@@ -27,3 +26,11 @@ Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico 
 
 4. Mudar Título do cabeçaho da página de formulário
 Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA" para o nome dinâmico do título da votação
+
+
+Alterações na pagina de gestão:
+- No modal box, de adicionar o funcionário, É preciso Limitar o numero maximo de caracteres para 5 no campo RE do registro de funcionario
+
+Alteraões na página de votação
+- Não permitir usar ponto no campo de RE do formulário de votação
+- Apagar o placeholder do campo senha do formulário de votações ou mudar a bolinha para outro 

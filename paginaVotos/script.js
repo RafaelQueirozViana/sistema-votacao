@@ -15,9 +15,30 @@ const POLLING_INTERVAL = 5000;
 // INICIALIZAÇÃO
 // ─────────────────────────────────────────────
 
-window.addEventListener('load', () => {
-    iniciarCamera();
+window.addEventListener('load', async () => {
     iniciarPolling();
+
+    try {
+        const res    = await fetch(API + '/status');
+        const status = await res.json();
+
+        _estadoAnterior.aberta   = status.aberta;
+        _estadoAnterior.iniciada = status.iniciada;
+
+        if (status.aberta) {
+            // Votação aberta → fluxo normal: câmera primeiro
+            await carregarCandidatos();
+            iniciarCamera();
+        } else {
+            // Sem votação ativa → vai direto para o card com mensagem, sem câmera
+            const msg = status.iniciada
+                ? 'A votação foi encerrada.'
+                : 'A votação ainda não foi iniciada.';
+            mostrarMensagemSemCamera(msg);
+        }
+    } catch {
+        mostrarMensagemSemCamera('Não foi possível conectar ao servidor.');
+    }
 });
 
 // ─────────────────────────────────────────────
@@ -102,13 +123,10 @@ function refazerFoto() {
 }
 
 async function confirmarFoto() {
-    // Atualiza miniatura no formulário
     document.getElementById('foto-thumb').src = _fotoBase64;
 
-    // Para o stream — câmera não é mais necessária
     pararCamera();
 
-    // Animação de transição
     const telaCamera     = document.getElementById('tela-camera');
     const telaFormulario = document.getElementById('tela-formulario');
 
@@ -121,8 +139,10 @@ async function confirmarFoto() {
         setTimeout(() => telaFormulario.classList.remove('entrando'), 400);
     }, 280);
 
-    // Sincroniza estado da votação imediatamente ao entrar no formulário
-    await sincronizarFormulario();
+    // Carrega candidatos diretamente — não chama sincronizarFormulario
+    // para não acionar o reset de câmera que o polling usaria
+    await carregarCandidatos();
+    mostrarFormulario();
 }
 
 function voltarCamera() {
@@ -175,6 +195,15 @@ async function verificarMudancas() {
 // SINCRONIZAÇÃO DO FORMULÁRIO
 // ─────────────────────────────────────────────
 
+// Pula a câmera e exibe a mensagem diretamente no card do formulário
+function mostrarMensagemSemCamera() {
+    pararCamera();
+    document.getElementById('tela-camera').style.display     = 'none';
+    document.querySelector('.foto-thumb-wrap').style.display  = 'none';
+    document.getElementById('tela-formulario').style.display  = 'flex';
+    mostrarMensagem(arguments[0]);
+}
+
 async function sincronizarFormulario(status = null) {
     try {
         if (!status) {
@@ -187,10 +216,36 @@ async function sincronizarFormulario(status = null) {
 
         if (status.aberta) {
             await carregarCandidatos();
-            mostrarFormulario();
+
+            // Votação abriu (ou reabriu) — sempre reinicia pelo fluxo da câmera
+            // independente de qual tela estiver visível no momento
+            _fotoBase64 = null;
+            document.getElementById('tela-formulario').style.display = 'none';
+            document.getElementById('tela-sucesso').style.display    = 'none';
+            document.querySelector('.foto-thumb-wrap').style.display  = '';
+
+            const telaCamera = document.getElementById('tela-camera');
+            telaCamera.classList.remove('saindo', 'entrando');
+            document.getElementById('camera-preview').style.display = 'none';
+            document.getElementById('camera-live').style.display    = 'flex';
+            const btnFoto = document.getElementById('btn-foto');
+            btnFoto.disabled = true;
+            btnFoto.classList.remove('pronto');
+            document.getElementById('camera-instrucao').textContent = 'Aguardando câmera…';
+            telaCamera.style.display = 'flex';
+
+            iniciarCamera();
         } else {
-            const msg = status.iniciada ? 'A votação foi encerrada.' : 'A votação ainda não foi iniciada.';
-            mostrarMensagem(msg);
+            const msg = status.iniciada
+                ? 'A votação foi encerrada.'
+                : 'A votação ainda não foi iniciada.';
+
+            // Se a votação fechar enquanto o usuário ainda está na câmera
+            if (document.getElementById('tela-camera').style.display !== 'none') {
+                mostrarMensagemSemCamera(msg);
+            } else {
+                mostrarMensagem(msg);
+            }
         }
     } catch {
         mostrarMensagem('Não foi possível conectar ao servidor.');
