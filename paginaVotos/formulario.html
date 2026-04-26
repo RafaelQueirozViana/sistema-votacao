@@ -69,7 +69,7 @@
 
             <div class="card-header">
                 <p class="tup-logo">TUP TECH</p>
-                <h1>Votação CIPA</h1>
+                <h1 id="titulo-votacao">Votação CIPA</h1>
                 <p class="subtitle">Selecione seu voto, insira seu RE e clique em Enviar</p>
             </div>
 
@@ -88,14 +88,14 @@
 
                 <div class="form-group">
                     <label for="re-funcionario">RE do Funcionário</label>
-                    <input type="number" id="re-funcionario"
-                        oninput="if(this.value.length > 5) this.value = this.value.slice(0, 5);"
-                        placeholder="Ex: 00123" max="5" />
+                    <input type="text" inputmode="numeric" id="re-funcionario"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,5);"
+                        placeholder="Ex: 00123" />
                 </div>
 
                 <div class="form-group">
                     <label for="senha">Senha</label>
-                    <input type="password" id="senha" placeholder="••••••••" />
+                    <input type="password" id="senha" placeholder="Digite sua senha" />
                 </div>
 
                 <div class="form-group">

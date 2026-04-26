@@ -6,13 +6,10 @@ Requisitos Importantes solicitados por Henrique e Allaf
 
 Funcionalidades e mini ajustes necessarios para fazer:
 
+1111 --- Aprimorar a guia dos horarios, para fazer igual a guia historico de votações, exibindo cada votação em forma de cards como no historico, porem exibindo foto, nome, re e horario que votou
 
-- Criar ou começar a ver a parte de imprimir o cartão com a impressora
-- Aprimorar a guia dos horarios, para fazer igual a guia historico de votações, exibindo cada votação em forma de cards como no historico, porem exibindo foto, nome, re e horario que votou
+2222 -  Criar ou começar a ver a parte de imprimir o cartão com a impressora
 
-- Limitar o numero maximo de caracteres para 5 no campo RE do registro de funcionario na pagina da gestao
-- Não permitir usar ponto no campo de RE do formulário de votação
-- Apagar o placeholder do campo senha do formulário de votações ou mudar a bolinha para outro texto
 
 Além disso, tem todas essas funcionalidades que precisam funcionar:
 
@@ -24,13 +21,21 @@ Na página de criação de votação (Gestão), adicione um campo para o gestor 
 Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
 Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
 
-4. Mudar Título do cabeçaho da página de formulário
-Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA" para o nome dinâmico do título da votação
 
 
-Alterações na pagina de gestão:
-- No modal box, de adicionar o funcionário, É preciso Limitar o numero maximo de caracteres para 5 no campo RE do registro de funcionario
 
-Alteraões na página de votação
+
+
+1 - Alterações na pagina de gestão na guia cadastro de funcionários:
+- No modal box(modal de adicionar o funcionário),no campo RE É preciso Limitar o numero maximo de caracteres para 5
+
+2 - Alteraões na página de votação
 - Não permitir usar ponto no campo de RE do formulário de votação
-- Apagar o placeholder do campo senha do formulário de votações ou mudar a bolinha para outro 
+- Mudar o placeholder do campo senha do formulário de votações para "digite sua senha"
+
+3 - Mudar Título do cabeçaho da página de formulário
+Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA" para o nome dinâmico do título da votação que esta acontecendo.
+
+
+4 - Alteração na pagina de votação
+No camera-card, deixar o max-width em 680px;

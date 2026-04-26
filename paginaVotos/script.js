@@ -277,13 +277,22 @@ function mostrarMensagem(texto) {
 
 async function carregarCandidatos() {
     try {
-        const res    = await fetch(API + '/candidatos');
-        const data   = await res.json();
-        const select = document.getElementById('voto-input');
+        const [resCandidatos, resInfo] = await Promise.all([
+            fetch(API + '/candidatos'),
+            fetch(API + '/votacao-info')
+        ]);
 
+        const candidatos = await resCandidatos.json();
+        const info       = await resInfo.json();
+
+        // Atualiza título dinâmico
+        const tituloEl = document.getElementById('titulo-votacao');
+        if (tituloEl && info && info.nome) tituloEl.textContent = info.nome;
+
+        const select = document.getElementById('voto-input');
         while (select.options.length > 1) select.remove(1);
 
-        data.forEach(item => {
+        candidatos.forEach(item => {
             const opt       = document.createElement('option');
             opt.value       = item.nome.toLowerCase();
             opt.textContent = item.nome;
