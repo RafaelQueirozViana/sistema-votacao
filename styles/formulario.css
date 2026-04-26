@@ -507,6 +507,7 @@ body {
 }
 
 input[type="number"],
+input[type="text"],
 input[type="password"],
 select {
     width: 100%;
@@ -524,6 +525,7 @@ select {
 }
 
 input[type="number"]:focus,
+input[type="text"]:focus,
 input[type="password"]:focus,
 select:focus {
     border-color: var(--text);

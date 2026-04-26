@@ -6,7 +6,7 @@ Requisitos Importantes solicitados por Henrique e Allaf
 
 Funcionalidades e mini ajustes necessarios para fazer:
 
-1111 --- Aprimorar a guia dos horarios, para fazer igual a guia historico de votações, exibindo cada votação em forma de cards como no historico, porem exibindo foto, nome, re e horario que votou
+1111 ---Na página de gestão, na guia Relatório de Horáriows, Aprimorar o relatório, para fazer como a guia historico de votações, exibindo cada votação em forma de cards, onde quando clica em vizualizar é aberto o relatorio dos funcionarios que votaram,  porem exibindo foto, nome, re e horario que votou
 
 2222 -  Criar ou começar a ver a parte de imprimir o cartão com a impressora
 
