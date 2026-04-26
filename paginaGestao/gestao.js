@@ -362,26 +362,134 @@ async function confirmarInicio() {
 // RELATÓRIO DE HORÁRIOS
 // ─────────────────────────────────────────────
 
-async function carregarRelatorio() {
-    try {
-        const res = await fetch(API + '/relatorio');
-        const data = await res.json();
-        const tb = document.getElementById('tabela-relatorio');
+let _dadosRelatorio = []; // cache para o modal de detalhe
 
-        if (!data || data.length === 0) {
-            tb.innerHTML = '<tr><td colspan="2" class="empty-row">Nenhum voto registrado ainda</td></tr>';
-        } else {
-            tb.innerHTML = data.map(row => `
-                <tr>
-                    <td>${row.idFuncionario}</td>
-                    <td class="right">${new Date(row.dataHora).toLocaleString('pt-BR')}</td>
-                </tr>
-            `).join('');
+async function carregarRelatorio() {
+    const lista = document.getElementById('relatorio-lista');
+    lista.innerHTML = '<p class="hist-loading">Carregando...</p>';
+
+    try {
+        const [resRel, resInfo] = await Promise.all([
+            fetch(API + '/relatorio'),
+            fetch(API + '/votacao-info')
+        ]);
+        const dados = await resRel.json();
+        const info  = await resInfo.json();
+
+        _dadosRelatorio = dados;
+
+        if (!dados || dados.length === 0) {
+            lista.innerHTML = `
+                <div class="hist-vazio">
+                    <p>Nenhum voto registrado nesta sessão.</p>
+                    <p style="font-size:0.8rem;margin-top:4px">Os registros aparecerão aqui assim que os votos forem computados.</p>
+                </div>`;
+            return;
         }
+
+        const nomeSessao = info && info.nome ? escapeHtml(info.nome) : 'Sessão atual';
+
+        lista.innerHTML = `
+            <div class="hist-card">
+                <div class="hist-card-info">
+                    <p class="hist-card-nome">${nomeSessao}</p>
+                    <p class="hist-card-data">${dados.length} voto${dados.length !== 1 ? 's' : ''} registrado${dados.length !== 1 ? 's' : ''}</p>
+                </div>
+                <div class="hist-card-actions">
+                    <button class="btn-hist-view" onclick="abrirModalRelatorio()">Visualizar</button>
+                </div>
+            </div>`;
+
     } catch {
-        alert('Erro ao carregar relatório.');
+        lista.innerHTML = '<p class="hist-loading" style="color:#c0392b">Erro ao carregar relatório.</p>';
     }
 }
+
+function renderizarParticipantes(dados) {
+    return dados.map((row) => `
+        <div class="rel-participante-card" data-nome="${escapeHtml((row.nome || '').toLowerCase())}">
+            <div class="rel-avatar ${row.foto ? 'rel-avatar-clicavel' : ''}"
+                 ${row.foto ? `onclick="abrirLightbox('${row.foto.replace(/'/g, "\\'")}', '${escapeHtml(row.nome || row.idFuncionario).replace(/'/g, "\\'")}')" title="Clique para ampliar"` : ''}>
+                ${row.foto
+                    ? `<img src="${row.foto}" alt="Foto de ${escapeHtml(row.nome || row.idFuncionario)}" />`
+                    : `<span class="rel-avatar-icon">👤</span>`
+                }
+                ${row.foto ? `<span class="rel-avatar-expand">⛶</span>` : ''}
+            </div>
+            <div class="rel-participante-info">
+                <p class="rel-participante-nome">${escapeHtml(row.nome || 'Desconhecido')}</p>
+                <p class="rel-participante-re">RE: ${escapeHtml(row.idFuncionario)}</p>
+            </div>
+            <div class="rel-participante-hora">
+                <p class="rel-hora-label">Horário</p>
+                <p class="rel-hora-val">${new Date(row.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
+                <p class="rel-data-val">${new Date(row.dataHora).toLocaleDateString('pt-BR')}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function abrirModalRelatorio() {
+    const lista  = document.getElementById('rel-modal-lista');
+    const vazio  = document.getElementById('rel-modal-vazio');
+    const titulo = document.getElementById('rel-modal-nome');
+    const filtroInput = document.getElementById('rel-filtro-input');
+
+    const nomeEl = document.querySelector('#relatorio-lista .hist-card-nome');
+    titulo.textContent = nomeEl ? nomeEl.textContent : 'Relatório';
+
+    // Limpa filtro ao abrir
+    if (filtroInput) filtroInput.value = '';
+    document.getElementById('rel-filtro-vazio').style.display = 'none';
+
+    if (!_dadosRelatorio || _dadosRelatorio.length === 0) {
+        lista.innerHTML = '';
+        vazio.style.display = 'block';
+    } else {
+        vazio.style.display = 'none';
+        lista.innerHTML = renderizarParticipantes(_dadosRelatorio);
+    }
+
+    document.getElementById('modal-relatorio-overlay').style.display = 'flex';
+}
+
+function filtrarParticipantes(termo) {
+    const termoBaixo = termo.trim().toLowerCase();
+    const cards = document.querySelectorAll('.rel-participante-card');
+    const filtroVazio = document.getElementById('rel-filtro-vazio');
+    let visiveis = 0;
+
+    cards.forEach(card => {
+        const nome = card.dataset.nome || '';
+        const visivel = !termoBaixo || nome.includes(termoBaixo);
+        card.style.display = visivel ? '' : 'none';
+        if (visivel) visiveis++;
+    });
+
+    filtroVazio.style.display = (termoBaixo && visiveis === 0) ? 'block' : 'none';
+}
+
+function fecharModalRelatorio() {
+    document.getElementById('modal-relatorio-overlay').style.display = 'none';
+}
+
+// ── Lightbox ──
+
+function abrirLightbox(src, nome) {
+    document.getElementById('foto-lightbox-img').src   = src;
+    document.getElementById('foto-lightbox-nome').textContent = nome;
+    document.getElementById('foto-lightbox').style.display = 'flex';
+}
+
+function fecharLightbox() {
+    document.getElementById('foto-lightbox').style.display = 'none';
+    document.getElementById('foto-lightbox-img').src = '';
+}
+
+// Fecha lightbox com Escape
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fecharLightbox();
+});
 
 // ─────────────────────────────────────────────
 // HISTÓRICO DE VOTAÇÕES

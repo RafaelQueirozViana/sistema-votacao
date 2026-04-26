@@ -322,7 +322,7 @@ async function votar() {
         const res = await fetch(API + '/votar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idFuncionario, candidato, senha })
+            body: JSON.stringify({ idFuncionario, candidato, senha, foto: _fotoBase64 })
         });
 
         const data = await res.json();

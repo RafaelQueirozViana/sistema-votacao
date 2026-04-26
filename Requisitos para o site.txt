@@ -39,3 +39,7 @@ Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA"
 
 4 - Alteração na pagina de votação
 No camera-card, deixar o max-width em 680px;
+
+PENSAMENTO IMPORTANTISSIMO QUE TIVE
+
+QUANDO EU QUISER APAGAR OS VOTOS QUE TEVE ATE AGORA, EU TENHO Q TER ALGUM BACKUP DOS FUNCIONARIOS QUE FORAM ADICIONADOS PELO CARLOS

@@ -49,9 +49,15 @@ async function initDatabase() {
         CREATE TABLE IF NOT EXISTS votos (
             idFuncionario TEXT,
             candidato     TEXT,
-            dataHora      TEXT
+            dataHora      TEXT,
+            foto          TEXT
         )
     `);
+
+    // Migração: adiciona coluna foto se banco já existia sem ela
+    try {
+        await db.run(`ALTER TABLE votos ADD COLUMN foto TEXT`);
+    } catch { /* coluna já existe */ }
 
     // Tabela de controle de estado
     await db.exec(`
@@ -248,7 +254,7 @@ app.delete('/funcionarios/:id', async (req, res) => {
 // ─────────────────────────────────────────────
 
 app.post('/votar', async (req, res) => {
-    const { idFuncionario, candidato, senha } = req.body;
+    const { idFuncionario, candidato, senha, foto } = req.body;
 
     if (!idFuncionario || !candidato) {
         return res.json({ mensagem: 'Preencha todos os campos.' });
@@ -259,7 +265,6 @@ app.post('/votar', async (req, res) => {
         return res.json({ mensagem: 'A votação não está aberta no momento.' });
     }
 
-    // Busca funcionário pelo RE
     const funcionario = await db.get(
         'SELECT * FROM funcionarios WHERE re = ?',
         [String(idFuncionario).trim()]
@@ -269,13 +274,11 @@ app.post('/votar', async (req, res) => {
         return res.json({ mensagem: 'RE não autorizado. Verifique seu número de registro.' });
     }
 
-    // Valida senha (data de nascimento apenas com dígitos)
     const senhaDigitada = String(senha || '').replace(/\D/g, '');
     if (senhaDigitada !== funcionario.dataNascimento) {
         return res.json({ mensagem: 'Senha incorreta. Use sua data de nascimento (apenas números).' });
     }
 
-    // Verifica duplicidade de voto
     const jaVotou = await db.get('SELECT * FROM votos WHERE idFuncionario = ?', [idFuncionario]);
     if (jaVotou) {
         return res.json({ mensagem: 'Você já votou!' });
@@ -283,8 +286,8 @@ app.post('/votar', async (req, res) => {
 
     const dataHora = new Date().toISOString();
     await db.run(
-        'INSERT INTO votos (idFuncionario, candidato, dataHora) VALUES (?, ?, ?)',
-        [idFuncionario, candidato, dataHora]
+        'INSERT INTO votos (idFuncionario, candidato, dataHora, foto) VALUES (?, ?, ?, ?)',
+        [idFuncionario, candidato, dataHora, foto || null]
     );
     res.json({ mensagem: 'Voto registrado com sucesso!' });
 });
@@ -300,7 +303,12 @@ app.get('/votantes', async (req, res) => {
 });
 
 app.get('/relatorio', async (req, res) => {
-    const relatorio = await db.all('SELECT idFuncionario, dataHora FROM votos ORDER BY dataHora ASC');
+    const relatorio = await db.all(`
+        SELECT v.idFuncionario, v.dataHora, v.foto, f.nome
+        FROM votos v
+        LEFT JOIN funcionarios f ON f.re = v.idFuncionario
+        ORDER BY v.dataHora ASC
+    `);
     res.json(relatorio);
 });
 
