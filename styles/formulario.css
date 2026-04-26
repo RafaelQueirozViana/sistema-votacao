@@ -15,6 +15,9 @@
     --text: #181816;
     --muted: #A0A09A;
     --radius: 10px;
+    --green-bg: #f0faf3;
+    --green-fg: #1a6b30;
+    --green-border: #a8d5b5;
 }
 
 body {
@@ -26,6 +29,353 @@ body {
     justify-content: center;
     padding: 24px;
 }
+
+/* ════════════════════════════════════════════
+   TELA DE CÂMERA
+════════════════════════════════════════════ */
+
+.camera-wrap {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInUp 0.35s ease both;
+}
+
+.camera-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 480px;
+    padding: 36px 36px 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.07);
+}
+
+.camera-header {
+    margin-bottom: 24px;
+}
+
+.camera-header h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 6px;
+}
+
+.camera-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.55;
+}
+
+/* viewport do vídeo */
+.camera-viewport-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.camera-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #0f0f0f;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.camera-viewport video,
+.camera-viewport canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    /* Espelha o vídeo ao vivo para efeito de espelho natural */
+    transform: scaleX(-1);
+}
+
+/* o canvas do preview não deve ser espelhado —
+   a inversão já foi aplicada no drawImage */
+#camera-preview .camera-viewport canvas {
+    transform: none;
+}
+
+/* cantos decorativos da câmera */
+.camera-frame {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.camera-frame-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-color: rgba(255,255,255,0.75);
+    border-style: solid;
+}
+
+.camera-frame-corner.tl { top: 12px; left: 12px;  border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+.camera-frame-corner.tr { top: 12px; right: 12px;  border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+.camera-frame-corner.bl { bottom: 12px; left: 12px;  border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+.camera-frame-corner.br { bottom: 12px; right: 12px;  border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+/* linha de scan animada */
+.camera-scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    animation: scanLine 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes scanLine {
+    0%   { top: 10%;  opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 90%; opacity: 0; }
+}
+
+/* badge de confirmação no preview */
+.camera-preview-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26, 107, 48, 0.92);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 100px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+}
+
+/* instrução */
+.camera-instrucao {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 300;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.camera-instrucao-ok {
+    color: var(--green-fg);
+    font-weight: 400;
+}
+
+/* botão de captura */
+.btn-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    opacity: 0.4;
+}
+
+.btn-foto.pronto {
+    opacity: 1;
+}
+
+.btn-foto.pronto:hover { opacity: 0.82; }
+.btn-foto.pronto:active { transform: scale(0.985); }
+
+.btn-foto:disabled {
+    cursor: not-allowed;
+}
+
+.btn-foto-circulo {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+}
+
+/* botões do preview */
+.camera-preview-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-refazer {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-refazer:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+
+.btn-confirmar-foto {
+    flex: 2;
+    padding: 12px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-confirmar-foto:hover  { opacity: 0.82; }
+.btn-confirmar-foto:active { transform: scale(0.985); }
+
+/* erro de câmera */
+.camera-erro-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 16px;
+    text-align: center;
+}
+
+.camera-erro-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.camera-erro-titulo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.camera-erro-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 300px;
+    margin-bottom: 8px;
+}
+
+/* ════════════════════════════════════════════
+   TRANSIÇÕES ENTRE TELAS
+════════════════════════════════════════════ */
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOutUp {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-10px); }
+}
+
+.saindo {
+    animation: fadeOutUp 0.28s ease forwards;
+}
+
+#tela-formulario {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.entrando {
+    animation: fadeInUp 0.4s ease both;
+}
+
+/* ════════════════════════════════════════════
+   MINIATURA DA FOTO NO FORMULÁRIO
+════════════════════════════════════════════ */
+
+.foto-thumb-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 22px;
+}
+
+.foto-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--green-border);
+    flex-shrink: 0;
+}
+
+.foto-thumb-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.foto-thumb-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--green-fg);
+    letter-spacing: 0.02em;
+}
+
+.foto-thumb-refazer {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: left;
+    text-decoration: underline;
+    transition: color 0.13s;
+    width: fit-content;
+}
+
+.foto-thumb-refazer:hover {
+    color: var(--text);
+}
+
+/* ════════════════════════════════════════════
+   FORMULÁRIO DE VOTO (estilos originais)
+════════════════════════════════════════════ */
 
 .card {
     background: var(--surface);
@@ -147,15 +497,10 @@ select {
     transition: opacity 0.15s, transform 0.1s;
 }
 
-.btn:hover {
-    opacity: 0.82;
-}
+.btn:hover   { opacity: 0.82; }
+.btn:active  { transform: scale(0.985); }
 
-.btn:active {
-    transform: scale(0.985);
-}
-
-/* ── Popup de confirmação/erro ── */
+/* ── Popup ── */
 .popup {
     display: none;
     position: fixed;
@@ -177,15 +522,8 @@ select {
 }
 
 @keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
+    from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 .popup.sucesso {
@@ -217,6 +555,25 @@ select {
     transition: opacity 0.1s;
 }
 
-#popup-fechar:hover {
-    opacity: 1;
+#popup-fechar:hover { opacity: 1; }
+
+/* ── Responsivo ── */
+@media (max-width: 480px) {
+    body { padding: 16px; }
+
+    .camera-card,
+    .card {
+        padding: 28px 22px;
+        border-radius: 14px;
+    }
+
+    .camera-preview-actions {
+        flex-direction: column;
+    }
+
+    .btn-refazer,
+    .btn-confirmar-foto {
+        flex: none;
+        width: 100%;
+    }
 }

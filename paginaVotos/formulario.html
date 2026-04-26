@@ -10,52 +10,115 @@
 
 <body>
 
-    <div class="card">
+    <!-- ─── ETAPA 1: CÂMERA ─────────────────────────────────── -->
+    <div id="tela-camera" class="camera-wrap">
+        <div class="camera-card">
 
-        <div class="card-header">
-            <p class="tup-logo">TUP TECH</p>
-            <h1>Votação CIPA</h1>
-            <p class="subtitle">Selecione seu voto, insira seu RE e clique em Enviar</p>
+            <div class="camera-header">
+                <p class="tup-logo">TUP TECH</p>
+                <h1>Identificação</h1>
+                <p class="camera-sub">Posicione seu rosto no centro e tire uma foto para continuar.</p>
+            </div>
+
+            <!-- Visualização ao vivo -->
+            <div id="camera-live" class="camera-viewport-wrap">
+                <div class="camera-viewport">
+                    <video id="video" autoplay playsinline muted></video>
+                    <div class="camera-frame">
+                        <span class="camera-frame-corner tl"></span>
+                        <span class="camera-frame-corner tr"></span>
+                        <span class="camera-frame-corner bl"></span>
+                        <span class="camera-frame-corner br"></span>
+                    </div>
+                    <div class="camera-scan-line"></div>
+                </div>
+                <p id="camera-instrucao" class="camera-instrucao">Aguardando câmera…</p>
+                <button id="btn-foto" class="btn-foto" onclick="tirarFoto()" disabled>
+                    <span class="btn-foto-circulo"></span>
+                    Capturar Foto
+                </button>
+            </div>
+
+            <!-- Preview após captura -->
+            <div id="camera-preview" class="camera-viewport-wrap" style="display:none">
+                <div class="camera-viewport">
+                    <canvas id="canvas"></canvas>
+                    <div class="camera-preview-badge">✓ Foto capturada</div>
+                </div>
+                <p class="camera-instrucao camera-instrucao-ok">Ficou boa? Confirme para continuar ou refaça.</p>
+                <div class="camera-preview-actions">
+                    <button class="btn-refazer" onclick="refazerFoto()">↩ Refazer</button>
+                    <button class="btn-confirmar-foto" onclick="confirmarFoto()">Continuar →</button>
+                </div>
+            </div>
+
+            <!-- Erro de câmera -->
+            <div id="camera-erro" style="display:none" class="camera-erro-wrap">
+                <p class="camera-erro-icon">⚠</p>
+                <p class="camera-erro-titulo">Câmera não disponível</p>
+                <p class="camera-erro-sub">Permita o acesso à câmera nas configurações do navegador e tente novamente.</p>
+                <button class="btn-confirmar-foto" onclick="tentarNovamente()">Tentar novamente</button>
+            </div>
+
         </div>
-
-        <p id="msg-votacao" style="display:none"></p>
-
-        <form id="mainForm">
-
-            <div class="form-group">
-                <label for="re-funcionario">RE do Funcionário</label>
-                <input type="number" id="re-funcionario"
-                    oninput="if(this.value.length > 5) this.value = this.value.slice(0, 5);" placeholder="Ex: 00123"
-                    max="5" />
-            </div>
-
-            <div class="form-group">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" placeholder="••••••••" />
-            </div>
-
-            <div class="form-group">
-                <label for="voto-input">Candidato</label>
-                <select id="voto-input">
-                    <option value="" disabled selected>Selecione seu voto...</option>
-                </select>
-            </div>
-
-
-            <button type="button" class="btn" onclick="votar()">Enviar Voto</button>
-
-        </form>
     </div>
 
+    <!-- ─── ETAPA 2: FORMULÁRIO ──────────────────────────────── -->
+    <div id="tela-formulario" style="display:none">
+        <div class="card">
+
+            <div class="card-header">
+                <p class="tup-logo">TUP TECH</p>
+                <h1>Votação CIPA</h1>
+                <p class="subtitle">Selecione seu voto, insira seu RE e clique em Enviar</p>
+            </div>
+
+            <!-- Miniatura da foto tirada -->
+            <div class="foto-thumb-wrap">
+                <img id="foto-thumb" class="foto-thumb" src="" alt="Sua foto" />
+                <div class="foto-thumb-info">
+                    <span class="foto-thumb-label">✓ Foto registrada</span>
+                    <button class="foto-thumb-refazer" onclick="voltarCamera()">Refazer</button>
+                </div>
+            </div>
+
+            <p id="msg-votacao" style="display:none"></p>
+
+            <form id="mainForm">
+
+                <div class="form-group">
+                    <label for="re-funcionario">RE do Funcionário</label>
+                    <input type="number" id="re-funcionario"
+                        oninput="if(this.value.length > 5) this.value = this.value.slice(0, 5);"
+                        placeholder="Ex: 00123" max="5" />
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" placeholder="••••••••" />
+                </div>
+
+                <div class="form-group">
+                    <label for="voto-input">Candidato</label>
+                    <select id="voto-input">
+                        <option value="" disabled selected>Selecione seu voto...</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn" onclick="votar()">Enviar Voto</button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup de feedback -->
     <div id="popup" class="popup">
         <span class="popup-icon" id="popup-icone"></span>
         <span id="popup-texto"></span>
         <button id="popup-fechar" onclick="fecharPopup()">✕</button>
     </div>
 
-
     <script src="script.js"></script>
 </body>
 
 </html>
-
