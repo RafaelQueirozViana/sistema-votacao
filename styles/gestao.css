@@ -1938,13 +1938,7 @@ td.dim {
     }
 }
 
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 460px;
-    overflow-y: auto;
-    padding-right: 2px;
-}
+
 
 .rel-participante-card {
     display: flex;
