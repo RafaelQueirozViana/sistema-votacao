@@ -6,7 +6,7 @@ Requisitos Importantes solicitados por Henrique e Allaf
 
 Funcionalidades e mini ajustes necessarios para fazer:
 
-1111 ---Na página de gestão, na guia Relatório de Horáriows, Aprimorar o relatório, para fazer como a guia historico de votações, exibindo cada votação em forma de cards, onde quando clica em vizualizar é aberto o relatorio dos funcionarios que votaram,  porem exibindo foto, nome, re e horario que votou
+
 
 2222 -  Criar ou começar a ver a parte de imprimir o cartão com a impressora
 
@@ -25,26 +25,11 @@ Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico 
 
 
 
-
-1 - Alterações na pagina de gestão na guia cadastro de funcionários:
-- No modal box(modal de adicionar o funcionário),no campo RE É preciso Limitar o numero maximo de caracteres para 5
-
-2 - Alteraões na página de votação
-- Não permitir usar ponto no campo de RE do formulário de votação
-- Mudar o placeholder do campo senha do formulário de votações para "digite sua senha"
-
-3 - Mudar Título do cabeçaho da página de formulário
-Na página de formulario de votação, mudar o h1 com nome fixo "Votação CIPA" para o nome dinâmico do título da votação que esta acontecendo.
-
-
-4 - Alteração na pagina de votação
-No camera-card, deixar o max-width em 680px;
-
 Alterações 
 
 -na pagina de gestao, na guia cadastro de funcionarios, no campo nome completo,fazer o campo so dar para colocar texto
 - fazer os campos RE Do funcionário da pagina de gestao(da guia cadastro de funcionario) e da pagina de votação precisar obrigatoriamente ter 5 caracteres. Adicione essa verificação
 
-PENSAMENTO meio meh QUE TIVE
+PENSAMENTO QUE TIVE
 
 QUANDO EU QUISER APAGAR OS VOTOS QUE TEVE ATE AGORA, EU TENHO Q TER ALGUM BACKUP DOS FUNCIONARIOS QUE FORAM ADICIONADOS PELO CARLOS

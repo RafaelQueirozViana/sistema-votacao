@@ -391,7 +391,10 @@ app.delete('/resetar', async (req, res) => {
         const info   = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
         const status = await getStatus();
 
-        if (info && info.nome && status.iniciada) {
+        // Só arquiva aqui se a votação ainda estiver aberta —
+        // ou seja, não passou pelo fluxo manual de /encerrar + /arquivar.
+        // Se já foi encerrada (aberta = 0, iniciada = 1), já foi arquivada.
+        if (info && info.nome && status.aberta) {
             const votos = await db.all(
                 'SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato'
             );
