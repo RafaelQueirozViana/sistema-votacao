@@ -95,7 +95,6 @@ function mostrarAba(aba, btn) {
     if (aba === 'visao-geral') { carregarVisaoGeral(); iniciarAutoRefresh(); }
     else { pararAutoRefresh(); }
 
-    if (aba === 'relatorio') carregarRelatorio();
     if (aba === 'historico') carregarHistorico();
     if (aba === 'funcionarios') carregarFuncionarios();
 }
@@ -359,51 +358,8 @@ async function confirmarInicio() {
 }
 
 // ─────────────────────────────────────────────
-// RELATÓRIO DE HORÁRIOS
+// PARTICIPANTES — renderização compartilhada
 // ─────────────────────────────────────────────
-
-let _dadosRelatorio = []; // cache para o modal de detalhe
-
-async function carregarRelatorio() {
-    const lista = document.getElementById('relatorio-lista');
-    lista.innerHTML = '<p class="hist-loading">Carregando...</p>';
-
-    try {
-        const [resRel, resInfo] = await Promise.all([
-            fetch(API + '/relatorio'),
-            fetch(API + '/votacao-info')
-        ]);
-        const dados = await resRel.json();
-        const info  = await resInfo.json();
-
-        _dadosRelatorio = dados;
-
-        if (!dados || dados.length === 0) {
-            lista.innerHTML = `
-                <div class="hist-vazio">
-                    <p>Nenhum voto registrado nesta sessão.</p>
-                    <p style="font-size:0.8rem;margin-top:4px">Os registros aparecerão aqui assim que os votos forem computados.</p>
-                </div>`;
-            return;
-        }
-
-        const nomeSessao = info && info.nome ? escapeHtml(info.nome) : 'Sessão atual';
-
-        lista.innerHTML = `
-            <div class="hist-card">
-                <div class="hist-card-info">
-                    <p class="hist-card-nome">${nomeSessao}</p>
-                    <p class="hist-card-data">${dados.length} voto${dados.length !== 1 ? 's' : ''} registrado${dados.length !== 1 ? 's' : ''}</p>
-                </div>
-                <div class="hist-card-actions">
-                    <button class="btn-hist-view" onclick="abrirModalRelatorio()">Visualizar</button>
-                </div>
-            </div>`;
-
-    } catch {
-        lista.innerHTML = '<p class="hist-loading" style="color:#c0392b">Erro ao carregar relatório.</p>';
-    }
-}
 
 function renderizarParticipantes(dados) {
     return dados.map((row) => `
@@ -427,50 +383,6 @@ function renderizarParticipantes(dados) {
             </div>
         </div>
     `).join('');
-}
-
-function abrirModalRelatorio() {
-    const lista  = document.getElementById('rel-modal-lista');
-    const vazio  = document.getElementById('rel-modal-vazio');
-    const titulo = document.getElementById('rel-modal-nome');
-    const filtroInput = document.getElementById('rel-filtro-input');
-
-    const nomeEl = document.querySelector('#relatorio-lista .hist-card-nome');
-    titulo.textContent = nomeEl ? nomeEl.textContent : 'Relatório';
-
-    // Limpa filtro ao abrir
-    if (filtroInput) filtroInput.value = '';
-    document.getElementById('rel-filtro-vazio').style.display = 'none';
-
-    if (!_dadosRelatorio || _dadosRelatorio.length === 0) {
-        lista.innerHTML = '';
-        vazio.style.display = 'block';
-    } else {
-        vazio.style.display = 'none';
-        lista.innerHTML = renderizarParticipantes(_dadosRelatorio);
-    }
-
-    document.getElementById('modal-relatorio-overlay').style.display = 'flex';
-}
-
-function filtrarParticipantes(termo) {
-    const termoBaixo = termo.trim().toLowerCase();
-    const cards = document.querySelectorAll('.rel-participante-card');
-    const filtroVazio = document.getElementById('rel-filtro-vazio');
-    let visiveis = 0;
-
-    cards.forEach(card => {
-        const nome = card.dataset.nome || '';
-        const visivel = !termoBaixo || nome.includes(termoBaixo);
-        card.style.display = visivel ? '' : 'none';
-        if (visivel) visiveis++;
-    });
-
-    filtroVazio.style.display = (termoBaixo && visiveis === 0) ? 'block' : 'none';
-}
-
-function fecharModalRelatorio() {
-    document.getElementById('modal-relatorio-overlay').style.display = 'none';
 }
 
 // ── Lightbox ──
@@ -546,6 +458,7 @@ async function visualizarVotacao(id) {
         document.getElementById('hist-modal-data-encerramento').textContent =
             data.dataEncerramento ? new Date(data.dataEncerramento).toLocaleString('pt-BR') : '—';
 
+        // ── Resultado dos votos ──
         const tb = document.getElementById('hist-modal-tabela');
         const vazio = document.getElementById('hist-modal-vazio');
         const votos = data.votos || [];
@@ -583,11 +496,46 @@ async function visualizarVotacao(id) {
                 `).join('');
         }
 
+        // ── Participantes ──
+        const participantes = data.participantes || [];
+        const listaEl   = document.getElementById('hist-participantes-lista');
+        const vazioEl   = document.getElementById('hist-participantes-vazio');
+        const filtroEl  = document.getElementById('hist-filtro-input');
+        const filtroVazioEl = document.getElementById('hist-filtro-vazio');
+
+        // Limpa filtro ao abrir
+        if (filtroEl) filtroEl.value = '';
+        if (filtroVazioEl) filtroVazioEl.style.display = 'none';
+
+        if (participantes.length === 0) {
+            listaEl.innerHTML = '';
+            vazioEl.style.display = 'block';
+        } else {
+            vazioEl.style.display = 'none';
+            listaEl.innerHTML = renderizarParticipantes(participantes);
+        }
+
         document.getElementById('modal-historico-overlay').style.display = 'flex';
 
     } catch {
         alert('Erro ao carregar detalhes da votação.');
     }
+}
+
+function filtrarParticipantesHist(termo) {
+    const termoBaixo = termo.trim().toLowerCase();
+    const cards = document.querySelectorAll('#hist-participantes-lista .rel-participante-card');
+    const filtroVazio = document.getElementById('hist-filtro-vazio');
+    let visiveis = 0;
+
+    cards.forEach(card => {
+        const nome = card.dataset.nome || '';
+        const visivel = !termoBaixo || nome.includes(termoBaixo);
+        card.style.display = visivel ? '' : 'none';
+        if (visivel) visiveis++;
+    });
+
+    filtroVazio.style.display = (termoBaixo && visiveis === 0) ? 'block' : 'none';
 }
 
 function fecharModalHistorico() {

@@ -93,7 +93,8 @@ async function initDatabase() {
             descricao         TEXT DEFAULT '',
             dataCriacao       TEXT DEFAULT '',
             dataEncerramento  TEXT DEFAULT '',
-            votos             TEXT DEFAULT '[]'
+            votos             TEXT DEFAULT '[]',
+            participantes     TEXT DEFAULT '[]'
         )
     `);
 
@@ -113,6 +114,9 @@ async function initDatabase() {
     // Migração: adiciona coluna se banco antigo não tiver
     try {
         await db.run(`ALTER TABLE historico ADD COLUMN dataEncerramento TEXT DEFAULT ''`);
+    } catch { /* coluna já existe */ }
+    try {
+        await db.run(`ALTER TABLE historico ADD COLUMN participantes TEXT DEFAULT '[]'`);
     } catch { /* coluna já existe */ }
 
     app.listen(3000, '0.0.0.0', () => {
@@ -328,11 +332,21 @@ app.post('/arquivar', async (req, res) => {
         if (!info || !info.nome) return res.json({ mensagem: 'Nada para arquivar.' });
 
         const votos = await db.all('SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato');
+
+        // Salva participantes com nome, RE, horário e foto
+        const participantes = await db.all(`
+            SELECT v.idFuncionario, v.dataHora, v.foto, f.nome
+            FROM votos v
+            LEFT JOIN funcionarios f ON f.re = v.idFuncionario
+            ORDER BY v.dataHora ASC
+        `);
+
         const dataEncerramento = new Date().toISOString();
 
         await db.run(
-            'INSERT INTO historico (nome, descricao, dataCriacao, dataEncerramento, votos) VALUES (?, ?, ?, ?, ?)',
-            [info.nome, info.descricao || '', info.dataCriacao || dataEncerramento, dataEncerramento, JSON.stringify(votos)]
+            'INSERT INTO historico (nome, descricao, dataCriacao, dataEncerramento, votos, participantes) VALUES (?, ?, ?, ?, ?, ?)',
+            [info.nome, info.descricao || '', info.dataCriacao || dataEncerramento, dataEncerramento,
+             JSON.stringify(votos), JSON.stringify(participantes)]
         );
 
         res.json({ mensagem: 'Votação arquivada!' });
@@ -354,7 +368,8 @@ app.get('/historico', async (req, res) => {
 app.get('/historico/:id', async (req, res) => {
     const row = await db.get('SELECT * FROM historico WHERE id = ?', [req.params.id]);
     if (!row) return res.status(404).json({ erro: 'Não encontrado.' });
-    row.votos = JSON.parse(row.votos || '[]');
+    row.votos         = JSON.parse(row.votos         || '[]');
+    row.participantes = JSON.parse(row.participantes || '[]');
     res.json(row);
 });
 
@@ -364,15 +379,46 @@ app.delete('/historico/:id', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// RESET
+// RESET — arquiva automaticamente antes de limpar
 // ─────────────────────────────────────────────
 
 app.delete('/resetar', async (req, res) => {
-    await db.run('DELETE FROM votos');
-    await db.run('DELETE FROM candidatos');
-    await db.run('UPDATE controle SET iniciada = 0, aberta = 0 WHERE id = 1');
-    await db.run(`UPDATE votacao_info SET nome = '', descricao = '', dataCriacao = '' WHERE id = 1`);
-    res.json({ mensagem: 'Votação resetada com sucesso!' });
+    try {
+        // Arquiva a votação atual ANTES de apagar os votos,
+        // garantindo que participantes e resultados sejam preservados.
+        // (O fluxo normal de encerrar já chama /arquivar antes, mas
+        //  ao criar nova votação diretamente o /resetar é a garantia.)
+        const info   = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
+        const status = await getStatus();
+
+        if (info && info.nome && status.iniciada) {
+            const votos = await db.all(
+                'SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato'
+            );
+            const participantes = await db.all(`
+                SELECT v.idFuncionario, v.dataHora, v.foto, f.nome
+                FROM votos v
+                LEFT JOIN funcionarios f ON f.re = v.idFuncionario
+                ORDER BY v.dataHora ASC
+            `);
+            const dataEncerramento = new Date().toISOString();
+
+            await db.run(
+                'INSERT INTO historico (nome, descricao, dataCriacao, dataEncerramento, votos, participantes) VALUES (?, ?, ?, ?, ?, ?)',
+                [info.nome, info.descricao || '', info.dataCriacao || dataEncerramento,
+                 dataEncerramento, JSON.stringify(votos), JSON.stringify(participantes)]
+            );
+        }
+
+        await db.run('DELETE FROM votos');
+        await db.run('DELETE FROM candidatos');
+        await db.run('UPDATE controle SET iniciada = 0, aberta = 0 WHERE id = 1');
+        await db.run(`UPDATE votacao_info SET nome = '', descricao = '', dataCriacao = '' WHERE id = 1`);
+        res.json({ mensagem: 'Votação resetada com sucesso!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao resetar.' });
+    }
 });
 
 // ─────────────────────────────────────────────

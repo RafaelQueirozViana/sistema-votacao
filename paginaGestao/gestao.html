@@ -118,42 +118,34 @@
                 style="display:none;text-align:center;color:var(--muted);padding:22px;font-size:0.875rem;font-weight:300">
                 Nenhum voto foi registrado nesta votação.
             </p>
-        </div>
-    </div>
 
-    <!-- ─── MODAL DE DETALHE DO RELATÓRIO ───────────────────── -->
-    <div id="modal-relatorio-overlay" class="modal-overlay" style="display:none">
-        <div class="modal-box modal-box-wide">
-            <div class="modal-hist-header">
-                <div>
-                    <h3 id="rel-modal-nome">—</h3>
-                    <p class="modal-sub" style="margin-bottom:4px">Participantes que votaram nesta sessão</p>
+            <!-- ── Seção de participantes ── -->
+            <div id="hist-participantes-secao">
+                <div class="modal-divider" style="margin:24px 0 16px"></div>
+                <p class="modal-label-section">Participantes que Votaram</p>
+
+                <div class="rel-filtro-wrap">
+                    <span class="material-icons rel-filtro-icon">search</span>
+                    <input
+                        type="text"
+                        id="hist-filtro-input"
+                        class="rel-filtro-input"
+                        placeholder="Filtrar por nome..."
+                        oninput="filtrarParticipantesHist(this.value)"
+                    />
                 </div>
-                <button class="btn-cancelar" onclick="fecharModalRelatorio()">✕ Fechar</button>
+
+                <div id="hist-participantes-lista" class="rel-modal-lista"></div>
+
+                <p id="hist-participantes-vazio"
+                    style="display:none;text-align:center;color:var(--muted);padding:24px;font-size:0.875rem;font-weight:300">
+                    Nenhum participante registrado nesta votação.
+                </p>
+                <p id="hist-filtro-vazio"
+                    style="display:none;text-align:center;color:var(--muted);padding:16px;font-size:0.875rem;font-weight:300">
+                    Nenhum participante encontrado para esta busca.
+                </p>
             </div>
-
-            <!-- Filtro por nome -->
-            <div class="rel-filtro-wrap">
-                <span class="material-icons rel-filtro-icon">search</span>
-                <input
-                    type="text"
-                    id="rel-filtro-input"
-                    class="rel-filtro-input"
-                    placeholder="Filtrar por nome..."
-                    oninput="filtrarParticipantes(this.value)"
-                />
-            </div>
-
-            <div id="rel-modal-lista" class="rel-modal-lista"></div>
-
-            <p id="rel-modal-vazio"
-                style="display:none;text-align:center;color:var(--muted);padding:32px;font-size:0.875rem;font-weight:300">
-                Nenhum voto registrado nesta sessão.
-            </p>
-            <p id="rel-filtro-vazio"
-                style="display:none;text-align:center;color:var(--muted);padding:24px;font-size:0.875rem;font-weight:300">
-                Nenhum participante encontrado para esta busca.
-            </p>
         </div>
     </div>
 
@@ -222,9 +214,6 @@
                     <button class="nav-btn active" onclick="mostrarAba('visao-geral', this)">
                         <span class="material-icons">bar_chart</span>
                         Status da Votação
-                    </button>
-                    <button class="nav-btn" onclick="mostrarAba('relatorio', this)">
-                        <span class="material-icons">assignment</span> Relatório de Horários
                     </button>
                     <button class="nav-btn" onclick="mostrarAba('historico', this)">
                         <span class="material-icons">history</span> Histórico de Votações
@@ -317,17 +306,6 @@
                 </div>
 
                 <p id="timestamp-geral" class="timestamp"></p>
-            </div>
-
-            <!-- ABA: RELATÓRIO -->
-            <div id="aba-relatorio" class="aba" style="display:none">
-                <div class="page-header">
-                    <h2>Relatório de Horários</h2>
-                    <button class="btn-refresh" onclick="carregarRelatorio()">↻ Atualizar</button>
-                </div>
-
-                <p class="section-title">Votações registradas nesta sessão</p>
-                <div id="relatorio-lista" class="historico-lista"></div>
             </div>
 
             <!-- ABA: HISTÓRICO -->
