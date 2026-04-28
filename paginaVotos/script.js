@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000';
+const API = 'http://10.92.198.19:3000';
 
 // ─────────────────────────────────────────────
 // ESTADO GLOBAL
