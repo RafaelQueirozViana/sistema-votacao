@@ -10,7 +10,7 @@ app.use(cors());
 
 // ─────────────────────────────────────────────
 // MIDDLEWARE: bloqueia a página de resultado se votação não iniciada
-// ─────────────────────────────────────────────
+
 
 app.use('/paginaResult', async (req, res, next) => {
     if (!db) return next();
@@ -227,13 +227,13 @@ app.post('/funcionarios', async (req, res) => {
     // dataNascimento deve ser 8 dígitos numéricos (DDMMAAAA)
     if (!/^\d{8}$/.test(dataNascimento.trim())) {
         return res.status(400).json({ ok: false, mensagem: 'Data de nascimento inválida. Use o formato DDMMAAAA.' });
-    }
-
-    try {
-        await db.run(
+      await db.run(
             'INSERT INTO funcionarios (nome, re, dataNascimento) VALUES (?, ?, ?)',
             [nome.trim(), re.trim(), dataNascimento.trim()]
-        );
+        );  }
+
+    try {
+    
         res.json({ ok: true, mensagem: 'Funcionário cadastrado com sucesso!' });
     } catch (err) {
         if (err.message.includes('UNIQUE')) {
@@ -346,7 +346,7 @@ app.post('/arquivar', async (req, res) => {
         await db.run(
             'INSERT INTO historico (nome, descricao, dataCriacao, dataEncerramento, votos, participantes) VALUES (?, ?, ?, ?, ?, ?)',
             [info.nome, info.descricao || '', info.dataCriacao || dataEncerramento, dataEncerramento,
-             JSON.stringify(votos), JSON.stringify(participantes)]
+            JSON.stringify(votos), JSON.stringify(participantes)]
         );
 
         res.json({ mensagem: 'Votação arquivada!' });
@@ -368,7 +368,7 @@ app.get('/historico', async (req, res) => {
 app.get('/historico/:id', async (req, res) => {
     const row = await db.get('SELECT * FROM historico WHERE id = ?', [req.params.id]);
     if (!row) return res.status(404).json({ erro: 'Não encontrado.' });
-    row.votos         = JSON.parse(row.votos         || '[]');
+    row.votos = JSON.parse(row.votos || '[]');
     row.participantes = JSON.parse(row.participantes || '[]');
     res.json(row);
 });
@@ -388,7 +388,7 @@ app.delete('/resetar', async (req, res) => {
         // garantindo que participantes e resultados sejam preservados.
         // (O fluxo normal de encerrar já chama /arquivar antes, mas
         //  ao criar nova votação diretamente o /resetar é a garantia.)
-        const info   = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
+        const info = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
         const status = await getStatus();
 
         // Só arquiva aqui se a votação ainda estiver aberta —
@@ -409,7 +409,7 @@ app.delete('/resetar', async (req, res) => {
             await db.run(
                 'INSERT INTO historico (nome, descricao, dataCriacao, dataEncerramento, votos, participantes) VALUES (?, ?, ?, ?, ?, ?)',
                 [info.nome, info.descricao || '', info.dataCriacao || dataEncerramento,
-                 dataEncerramento, JSON.stringify(votos), JSON.stringify(participantes)]
+                    dataEncerramento, JSON.stringify(votos), JSON.stringify(participantes)]
             );
         }
 

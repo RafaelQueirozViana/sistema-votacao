@@ -1,4 +1,4 @@
-const API = 'http://10.92.198.19:3000';
+const API = 'http://localhost:3000';
 const ESPECIAIS = ['branco', 'nulo'];
 let winnerText;
 let _autoRefreshTimer = null;
@@ -367,9 +367,9 @@ function renderizarParticipantes(dados) {
             <div class="rel-avatar ${row.foto ? 'rel-avatar-clicavel' : ''}"
                  ${row.foto ? `onclick="abrirLightbox('${row.foto.replace(/'/g, "\\'")}', '${escapeHtml(row.nome || row.idFuncionario).replace(/'/g, "\\'")}')" title="Clique para ampliar"` : ''}>
                 ${row.foto
-                    ? `<img src="${row.foto}" alt="Foto de ${escapeHtml(row.nome || row.idFuncionario)}" />`
-                    : `<span class="rel-avatar-icon">👤</span>`
-                }
+            ? `<img src="${row.foto}" alt="Foto de ${escapeHtml(row.nome || row.idFuncionario)}" />`
+            : `<span class="rel-avatar-icon">👤</span>`
+        }
                 ${row.foto ? `<span class="rel-avatar-expand">⛶</span>` : ''}
             </div>
             <div class="rel-participante-info">
@@ -388,7 +388,7 @@ function renderizarParticipantes(dados) {
 // ── Lightbox ──
 
 function abrirLightbox(src, nome) {
-    document.getElementById('foto-lightbox-img').src   = src;
+    document.getElementById('foto-lightbox-img').src = src;
     document.getElementById('foto-lightbox-nome').textContent = nome;
     document.getElementById('foto-lightbox').style.display = 'flex';
 }
@@ -498,9 +498,9 @@ async function visualizarVotacao(id) {
 
         // ── Participantes ──
         const participantes = data.participantes || [];
-        const listaEl   = document.getElementById('hist-participantes-lista');
-        const vazioEl   = document.getElementById('hist-participantes-vazio');
-        const filtroEl  = document.getElementById('hist-filtro-input');
+        const listaEl = document.getElementById('hist-participantes-lista');
+        const vazioEl = document.getElementById('hist-participantes-vazio');
+        const filtroEl = document.getElementById('hist-filtro-input');
         const filtroVazioEl = document.getElementById('hist-filtro-vazio');
 
         // Limpa filtro ao abrir
@@ -639,8 +639,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inputNasc) {
         inputNasc.addEventListener('input', e => {
             let v = e.target.value.replace(/\D/g, '').slice(0, 8);
-            if (v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
-            else if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+            if (v.length >= 5) v = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
+            else if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
             e.target.value = v;
         });
     }

@@ -1,14 +1,14 @@
-const API = 'http://10.92.198.19:3000';
+const API = 'http://localhost:3000';
 
 // ─────────────────────────────────────────────
 // ESTADO GLOBAL
 // ─────────────────────────────────────────────
 
-let _stream     = null;   // MediaStream ativo
+let _stream = null;   // MediaStream ativo
 let _fotoBase64 = null;   // Foto capturada, pronta para envio futuro
 
 let _estadoAnterior = { aberta: null, iniciada: null };
-let _pollingTimer   = null;
+let _pollingTimer = null;
 const POLLING_INTERVAL = 5000;
 
 // ─────────────────────────────────────────────
@@ -19,10 +19,10 @@ window.addEventListener('load', async () => {
     iniciarPolling();
 
     try {
-        const res    = await fetch(API + '/status');
+        const res = await fetch(API + '/status');
         const status = await res.json();
 
-        _estadoAnterior.aberta   = status.aberta;
+        _estadoAnterior.aberta = status.aberta;
         _estadoAnterior.iniciada = status.iniciada;
 
         if (status.aberta) {
@@ -47,10 +47,10 @@ window.addEventListener('load', async () => {
 
 async function iniciarCamera() {
     const instrucao = document.getElementById('camera-instrucao');
-    const btnFoto   = document.getElementById('btn-foto');
-    const erroEl    = document.getElementById('camera-erro');
-    const liveEl    = document.getElementById('camera-live');
-    const video     = document.getElementById('video');
+    const btnFoto = document.getElementById('btn-foto');
+    const erroEl = document.getElementById('camera-erro');
+    const liveEl = document.getElementById('camera-live');
+    const video = document.getElementById('video');
 
     // Remove qualquer stream anterior antes de abrir um novo
     if (_stream) {
@@ -77,8 +77,8 @@ async function iniciarCamera() {
         });
 
     } catch (err) {
-        liveEl.style.display  = 'none';
-        erroEl.style.display  = 'flex';
+        liveEl.style.display = 'none';
+        erroEl.style.display = 'flex';
         console.warn('Câmera indisponível:', err);
     }
 }
@@ -97,10 +97,10 @@ function tentarNovamente() {
 }
 
 function tirarFoto() {
-    const video  = document.getElementById('video');
+    const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
 
-    canvas.width  = video.videoWidth  || 640;
+    canvas.width = video.videoWidth || 640;
     canvas.height = video.videoHeight || 480;
 
     const ctx = canvas.getContext('2d');
@@ -112,14 +112,14 @@ function tirarFoto() {
 
     _fotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
-    document.getElementById('camera-live').style.display    = 'none';
+    document.getElementById('camera-live').style.display = 'none';
     document.getElementById('camera-preview').style.display = 'flex';
 }
 
 function refazerFoto() {
     _fotoBase64 = null;
     document.getElementById('camera-preview').style.display = 'none';
-    document.getElementById('camera-live').style.display    = 'flex';
+    document.getElementById('camera-live').style.display = 'flex';
 }
 
 async function confirmarFoto() {
@@ -127,13 +127,13 @@ async function confirmarFoto() {
 
     pararCamera();
 
-    const telaCamera     = document.getElementById('tela-camera');
+    const telaCamera = document.getElementById('tela-camera');
     const telaFormulario = document.getElementById('tela-formulario');
 
     telaCamera.classList.add('saindo');
 
     setTimeout(() => {
-        telaCamera.style.display     = 'none';
+        telaCamera.style.display = 'none';
         telaFormulario.style.display = 'flex';
         telaFormulario.classList.add('entrando');
         setTimeout(() => telaFormulario.classList.remove('entrando'), 400);
@@ -148,15 +148,15 @@ async function confirmarFoto() {
 function voltarCamera() {
     _fotoBase64 = null;
 
-    const telaCamera     = document.getElementById('tela-camera');
+    const telaCamera = document.getElementById('tela-camera');
     const telaFormulario = document.getElementById('tela-formulario');
 
     telaFormulario.style.display = 'none';
-    telaCamera.style.display     = 'flex';
+    telaCamera.style.display = 'flex';
     telaCamera.classList.remove('saindo');
 
     document.getElementById('camera-preview').style.display = 'none';
-    document.getElementById('camera-live').style.display    = 'flex';
+    document.getElementById('camera-live').style.display = 'flex';
 
     const btnFoto = document.getElementById('btn-foto');
     btnFoto.disabled = true;
@@ -181,10 +181,10 @@ function pararPolling() {
 
 async function verificarMudancas() {
     try {
-        const res    = await fetch(API + '/status');
+        const res = await fetch(API + '/status');
         const status = await res.json();
 
-        const abertaMudou   = status.aberta   !== _estadoAnterior.aberta;
+        const abertaMudou = status.aberta !== _estadoAnterior.aberta;
         const iniciadaMudou = status.iniciada !== _estadoAnterior.iniciada;
 
         if (abertaMudou || iniciadaMudou) await sincronizarFormulario(status);
@@ -198,9 +198,9 @@ async function verificarMudancas() {
 // Pula a câmera e exibe a mensagem diretamente no card do formulário
 function mostrarMensagemSemCamera() {
     pararCamera();
-    document.getElementById('tela-camera').style.display     = 'none';
-    document.querySelector('.foto-thumb-wrap').style.display  = 'none';
-    document.getElementById('tela-formulario').style.display  = 'flex';
+    document.getElementById('tela-camera').style.display = 'none';
+    document.querySelector('.foto-thumb-wrap').style.display = 'none';
+    document.getElementById('tela-formulario').style.display = 'flex';
     mostrarMensagem(arguments[0]);
 }
 
@@ -211,7 +211,7 @@ async function sincronizarFormulario(status = null) {
             status = await res.json();
         }
 
-        _estadoAnterior.aberta   = status.aberta;
+        _estadoAnterior.aberta = status.aberta;
         _estadoAnterior.iniciada = status.iniciada;
 
         if (status.aberta) {
@@ -221,13 +221,13 @@ async function sincronizarFormulario(status = null) {
             // independente de qual tela estiver visível no momento
             _fotoBase64 = null;
             document.getElementById('tela-formulario').style.display = 'none';
-            document.getElementById('tela-sucesso').style.display    = 'none';
-            document.querySelector('.foto-thumb-wrap').style.display  = '';
+            document.getElementById('tela-sucesso').style.display = 'none';
+            document.querySelector('.foto-thumb-wrap').style.display = '';
 
             const telaCamera = document.getElementById('tela-camera');
             telaCamera.classList.remove('saindo', 'entrando');
             document.getElementById('camera-preview').style.display = 'none';
-            document.getElementById('camera-live').style.display    = 'flex';
+            document.getElementById('camera-live').style.display = 'flex';
             const btnFoto = document.getElementById('btn-foto');
             btnFoto.disabled = true;
             btnFoto.classList.remove('pronto');
@@ -257,17 +257,17 @@ async function sincronizarFormulario(status = null) {
 // ─────────────────────────────────────────────
 
 function mostrarFormulario() {
-    document.getElementById('mainForm').style.display        = 'block';
-    document.getElementById('msg-votacao').style.display     = 'none';
-    document.getElementById('re-funcionario').value          = '';
-    document.getElementById('senha').value                   = '';
-    document.getElementById('voto-input').value              = '';
+    document.getElementById('mainForm').style.display = 'block';
+    document.getElementById('msg-votacao').style.display = 'none';
+    document.getElementById('re-funcionario').value = '';
+    document.getElementById('senha').value = '';
+    document.getElementById('voto-input').value = '';
 }
 
 function mostrarMensagem(texto) {
-    document.getElementById('mainForm').style.display    = 'none';
+    document.getElementById('mainForm').style.display = 'none';
     const msg = document.getElementById('msg-votacao');
-    msg.textContent  = texto;
+    msg.textContent = texto;
     msg.style.display = 'block';
 }
 
@@ -283,7 +283,7 @@ async function carregarCandidatos() {
         ]);
 
         const candidatos = await resCandidatos.json();
-        const info       = await resInfo.json();
+        const info = await resInfo.json();
 
         // Atualiza título dinâmico
         const tituloEl = document.getElementById('titulo-votacao');
@@ -293,8 +293,8 @@ async function carregarCandidatos() {
         while (select.options.length > 1) select.remove(1);
 
         candidatos.forEach(item => {
-            const opt       = document.createElement('option');
-            opt.value       = item.nome.toLowerCase();
+            const opt = document.createElement('option');
+            opt.value = item.nome.toLowerCase();
             opt.textContent = item.nome;
             select.appendChild(opt);
         });
@@ -310,8 +310,8 @@ async function carregarCandidatos() {
 
 async function votar() {
     const idFuncionario = document.getElementById('re-funcionario').value.trim();
-    const senha         = document.getElementById('senha').value.trim();
-    const candidato     = document.getElementById('voto-input').value;
+    const senha = document.getElementById('senha').value.trim();
+    const candidato = document.getElementById('voto-input').value;
 
     if (!idFuncionario || !senha || !candidato) {
         mostrarPopup('Preencha todos os campos antes de votar.', 'erro');
@@ -339,7 +339,7 @@ async function votar() {
 
 function mostrarTelaSucesso() {
     const telaFormulario = document.getElementById('tela-formulario');
-    const telaSucesso    = document.getElementById('tela-sucesso');
+    const telaSucesso = document.getElementById('tela-sucesso');
 
     telaFormulario.classList.add('saindo');
     setTimeout(() => {
@@ -354,11 +354,11 @@ function mostrarTelaSucesso() {
 function voltarParaFormulario() {
     _fotoBase64 = null;
     document.getElementById('re-funcionario').value = '';
-    document.getElementById('senha').value          = '';
-    document.getElementById('voto-input').value     = '';
+    document.getElementById('senha').value = '';
+    document.getElementById('voto-input').value = '';
 
     const telaSucesso = document.getElementById('tela-sucesso');
-    const telaCamera  = document.getElementById('tela-camera');
+    const telaCamera = document.getElementById('tela-camera');
 
     // Esconde sucesso sem animação para evitar conflito com entrando da câmera
     telaSucesso.style.display = 'none';
@@ -368,7 +368,7 @@ function voltarParaFormulario() {
 
     // Reseta UI interna da câmera
     document.getElementById('camera-preview').style.display = 'none';
-    document.getElementById('camera-live').style.display    = 'flex';
+    document.getElementById('camera-live').style.display = 'flex';
     const btnFoto = document.getElementById('btn-foto');
     btnFoto.disabled = true;
     btnFoto.classList.remove('pronto');

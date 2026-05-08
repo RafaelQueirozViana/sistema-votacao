@@ -1,31 +1,12 @@
-Requisitos Importantes solicitados por Henrique e Allaf
-
--  um sistema onde quando o funcionário preenche os dados e clica em votar na pagina formulario, a impressora tem que imprimir um cartão com os dados do voto, e as tres assinatura da CIPA
-
-
-
 Funcionalidades e mini ajustes necessarios para fazer:
-
-
-
-2222 -  Criar ou começar a ver a parte de imprimir o cartão com a impressora
-
-
-Além disso, tem todas essas funcionalidades que precisam funcionar:
 
 Preciso de ajuda para realizar as seguintes manutenções no meu sistema de votação. Abaixo estão os requisitos e as correções necessárias:
 1. Sistema de Tempo Limite (Timeout):
-Na página de criação de votação (Gestão), adicione um campo para o gestor definir um tempo limite (em minutos ou horas) para o formulário permanecer aberto. Implemente a lógica para que o formulário expire automaticamente após esse período.
+Na página de criação de votação (Gestão), adicione um campo para o gestor definir um tempo limite (em horas e minutos) para o formulário permanecer aberto. Implemente a lógica para que o formulário expire automaticamente após esse período.
 
 3. Atalho no Banner de Vencedor (Winner Banner):
 Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
 Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
-
-
-
-
-
-Alterações 
 
 -na pagina de gestao, na guia cadastro de funcionarios, no campo nome completo,fazer o campo so dar para colocar texto
 - fazer os campos RE Do funcionário da pagina de gestao(da guia cadastro de funcionario) e da pagina de votação precisar obrigatoriamente ter 5 caracteres. Adicione essa verificação
