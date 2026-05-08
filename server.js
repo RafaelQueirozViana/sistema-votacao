@@ -10,7 +10,7 @@ app.use(cors());
 
 // ─────────────────────────────────────────────
 // MIDDLEWARE: bloqueia a página de resultado se votação não iniciada
-
+// ─────────────────────────────────────────────
 
 app.use('/paginaResult', async (req, res, next) => {
     if (!db) return next();
@@ -78,10 +78,12 @@ async function initDatabase() {
     // Metadados da votação atual
     await db.exec(`
         CREATE TABLE IF NOT EXISTS votacao_info (
-            id          INTEGER PRIMARY KEY,
-            nome        TEXT DEFAULT '',
-            descricao   TEXT DEFAULT '',
-            dataCriacao TEXT DEFAULT ''
+            id              INTEGER PRIMARY KEY,
+            nome            TEXT DEFAULT '',
+            descricao       TEXT DEFAULT '',
+            dataCriacao     TEXT DEFAULT '',
+            tempoLimite     INTEGER DEFAULT 0,
+            dataExpiracao   TEXT DEFAULT ''
         )
     `);
 
@@ -98,7 +100,7 @@ async function initDatabase() {
         )
     `);
 
-    // ── NOVO: Tabela de funcionários cadastrados ──
+    // Tabela de funcionários cadastrados
     await db.exec(`
         CREATE TABLE IF NOT EXISTS funcionarios (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,15 +111,16 @@ async function initDatabase() {
     `);
 
     await db.run(`INSERT OR IGNORE INTO controle (id, iniciada, aberta) VALUES (1, 0, 0)`);
-    await db.run(`INSERT OR IGNORE INTO votacao_info (id, nome, descricao, dataCriacao) VALUES (1, '', '', '')`);
+    await db.run(`INSERT OR IGNORE INTO votacao_info (id, nome, descricao, dataCriacao, tempoLimite, dataExpiracao) VALUES (1, '', '', '', 0, '')`);
 
-    // Migração: adiciona coluna se banco antigo não tiver
-    try {
-        await db.run(`ALTER TABLE historico ADD COLUMN dataEncerramento TEXT DEFAULT ''`);
-    } catch { /* coluna já existe */ }
-    try {
-        await db.run(`ALTER TABLE historico ADD COLUMN participantes TEXT DEFAULT '[]'`);
-    } catch { /* coluna já existe */ }
+    // Migrações para bancos antigos
+    try { await db.run(`ALTER TABLE historico ADD COLUMN dataEncerramento TEXT DEFAULT ''`); } catch { }
+    try { await db.run(`ALTER TABLE historico ADD COLUMN participantes TEXT DEFAULT '[]'`); } catch { }
+    try { await db.run(`ALTER TABLE votacao_info ADD COLUMN tempoLimite INTEGER DEFAULT 0`); } catch { }
+    try { await db.run(`ALTER TABLE votacao_info ADD COLUMN dataExpiracao TEXT DEFAULT ''`); } catch { }
+
+    // Inicia o job de verificação de expiração
+    iniciarJobExpiracao();
 
     app.listen(3000, '0.0.0.0', () => {
         console.log('Servidor rodando em http://localhost:3000');
@@ -126,6 +129,52 @@ async function initDatabase() {
 
 async function getStatus() {
     return await db.get('SELECT iniciada, aberta FROM controle WHERE id = 1');
+}
+
+// ─────────────────────────────────────────────
+// JOB AUTOMÁTICO DE EXPIRAÇÃO
+// Verifica a cada 30s se o tempo limite foi atingido
+// ─────────────────────────────────────────────
+
+function iniciarJobExpiracao() {
+    setInterval(async () => {
+        if (!db) return;
+        try {
+            const status = await getStatus();
+            if (!status.aberta) return;
+
+            const info = await db.get('SELECT dataExpiracao FROM votacao_info WHERE id = 1');
+            if (!info || !info.dataExpiracao) return;
+
+            if (new Date() >= new Date(info.dataExpiracao)) {
+                console.log('[JOB] Tempo limite atingido — encerrando e arquivando votação...');
+
+                // Encerra a votação
+                await db.run('UPDATE controle SET aberta = 0 WHERE id = 1');
+
+                // Arquiva no histórico
+                const fullInfo = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
+                const votos = await db.all('SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato');
+                const participantes = await db.all(`
+                    SELECT v.idFuncionario, v.dataHora, v.foto, f.nome
+                    FROM votos v
+                    LEFT JOIN funcionarios f ON f.re = v.idFuncionario
+                    ORDER BY v.dataHora ASC
+                `);
+                const dataEncerramento = new Date().toISOString();
+
+                await db.run(
+                    'INSERT INTO historico (nome, descricao, dataCriacao, dataEncerramento, votos, participantes) VALUES (?, ?, ?, ?, ?, ?)',
+                    [fullInfo.nome, fullInfo.descricao || '', fullInfo.dataCriacao || dataEncerramento,
+                        dataEncerramento, JSON.stringify(votos), JSON.stringify(participantes)]
+                );
+
+                console.log('[JOB] Votação encerrada automaticamente por tempo limite.');
+            }
+        } catch (err) {
+            console.error('[JOB] Erro no job de expiração:', err);
+        }
+    }, 30_000); // verifica a cada 30 segundos
 }
 
 // ─────────────────────────────────────────────
@@ -165,13 +214,27 @@ app.post('/encerrar', async (req, res) => {
 // ─────────────────────────────────────────────
 
 app.post('/votacao-info', async (req, res) => {
-    const { nome, descricao } = req.body;
+    const { nome, descricao, tempoLimite } = req.body;
     const dataCriacao = new Date().toISOString();
+
+    // tempoLimite em minutos (0 = sem limite)
+    const limiteMin = parseInt(tempoLimite) || 0;
+    let dataExpiracao = '';
+    if (limiteMin > 0) {
+        const exp = new Date(Date.now() + limiteMin * 60 * 1000);
+        dataExpiracao = exp.toISOString();
+    }
+
     await db.run(
-        'UPDATE votacao_info SET nome = ?, descricao = ?, dataCriacao = ? WHERE id = 1',
-        [nome || '', descricao || '', dataCriacao]
+        'UPDATE votacao_info SET nome = ?, descricao = ?, dataCriacao = ?, tempoLimite = ?, dataExpiracao = ? WHERE id = 1',
+        [nome || '', descricao || '', dataCriacao, limiteMin, dataExpiracao]
     );
     res.json({ mensagem: 'Info salva!' });
+});
+
+app.get('/votacao-info', async (req, res) => {
+    const info = await db.get('SELECT nome, descricao, dataCriacao, tempoLimite, dataExpiracao FROM votacao_info WHERE id = 1');
+    res.json(info || { nome: '', descricao: '', dataCriacao: '', tempoLimite: 0, dataExpiracao: '' });
 });
 
 // ─────────────────────────────────────────────
@@ -201,7 +264,6 @@ app.get('/candidatos', async (req, res) => {
 // FUNCIONÁRIOS
 // ─────────────────────────────────────────────
 
-// Listar todos os funcionários
 app.get('/funcionarios', async (req, res) => {
     try {
         const rows = await db.all('SELECT id, nome, re, dataNascimento FROM funcionarios ORDER BY nome ASC');
@@ -211,7 +273,6 @@ app.get('/funcionarios', async (req, res) => {
     }
 });
 
-// Cadastrar funcionário
 app.post('/funcionarios', async (req, res) => {
     const { nome, re, dataNascimento } = req.body;
 
@@ -219,21 +280,19 @@ app.post('/funcionarios', async (req, res) => {
         return res.status(400).json({ ok: false, mensagem: 'Preencha todos os campos.' });
     }
 
-    // RE deve ser numérico
     if (!/^\d+$/.test(re.trim())) {
         return res.status(400).json({ ok: false, mensagem: 'O RE deve conter apenas números.' });
     }
 
-    // dataNascimento deve ser 8 dígitos numéricos (DDMMAAAA)
     if (!/^\d{8}$/.test(dataNascimento.trim())) {
         return res.status(400).json({ ok: false, mensagem: 'Data de nascimento inválida. Use o formato DDMMAAAA.' });
-      await db.run(
-            'INSERT INTO funcionarios (nome, re, dataNascimento) VALUES (?, ?, ?)',
-            [nome.trim(), re.trim(), dataNascimento.trim()]
-        );  }
+    }
 
     try {
-    
+        await db.run(
+            'INSERT INTO funcionarios (nome, re, dataNascimento) VALUES (?, ?, ?)',
+            [nome.trim(), re.trim(), dataNascimento.trim()]
+        );
         res.json({ ok: true, mensagem: 'Funcionário cadastrado com sucesso!' });
     } catch (err) {
         if (err.message.includes('UNIQUE')) {
@@ -243,7 +302,6 @@ app.post('/funcionarios', async (req, res) => {
     }
 });
 
-// Excluir funcionário
 app.delete('/funcionarios/:id', async (req, res) => {
     try {
         await db.run('DELETE FROM funcionarios WHERE id = ?', [req.params.id]);
@@ -254,7 +312,7 @@ app.delete('/funcionarios/:id', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// VOTOS  ← agora valida contra tabela funcionarios
+// VOTOS
 // ─────────────────────────────────────────────
 
 app.post('/votar', async (req, res) => {
@@ -266,7 +324,7 @@ app.post('/votar', async (req, res) => {
 
     const status = await getStatus();
     if (!status.aberta) {
-        return res.json({ mensagem: 'A votação não está aberta no momento.' });
+        return res.json({ mensagem: 'A votação não está aberta no momento. Por favor, Recarregue a página' });
     }
 
     const funcionario = await db.get(
@@ -316,11 +374,6 @@ app.get('/relatorio', async (req, res) => {
     res.json(relatorio);
 });
 
-app.get('/votacao-info', async (req, res) => {
-    const info = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
-    res.json(info || { nome: '', descricao: '', dataCriacao: '' });
-});
-
 // ─────────────────────────────────────────────
 // ARQUIVAR → salva votação atual no histórico
 // ─────────────────────────────────────────────
@@ -332,8 +385,6 @@ app.post('/arquivar', async (req, res) => {
         if (!info || !info.nome) return res.json({ mensagem: 'Nada para arquivar.' });
 
         const votos = await db.all('SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato');
-
-        // Salva participantes com nome, RE, horário e foto
         const participantes = await db.all(`
             SELECT v.idFuncionario, v.dataHora, v.foto, f.nome
             FROM votos v
@@ -379,21 +430,14 @@ app.delete('/historico/:id', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// RESET — arquiva automaticamente antes de limpar
+// RESET
 // ─────────────────────────────────────────────
 
 app.delete('/resetar', async (req, res) => {
     try {
-        // Arquiva a votação atual ANTES de apagar os votos,
-        // garantindo que participantes e resultados sejam preservados.
-        // (O fluxo normal de encerrar já chama /arquivar antes, mas
-        //  ao criar nova votação diretamente o /resetar é a garantia.)
         const info = await db.get('SELECT nome, descricao, dataCriacao FROM votacao_info WHERE id = 1');
         const status = await getStatus();
 
-        // Só arquiva aqui se a votação ainda estiver aberta —
-        // ou seja, não passou pelo fluxo manual de /encerrar + /arquivar.
-        // Se já foi encerrada (aberta = 0, iniciada = 1), já foi arquivada.
         if (info && info.nome && status.aberta) {
             const votos = await db.all(
                 'SELECT candidato, COUNT(*) as total FROM votos GROUP BY candidato'
@@ -416,7 +460,7 @@ app.delete('/resetar', async (req, res) => {
         await db.run('DELETE FROM votos');
         await db.run('DELETE FROM candidatos');
         await db.run('UPDATE controle SET iniciada = 0, aberta = 0 WHERE id = 1');
-        await db.run(`UPDATE votacao_info SET nome = '', descricao = '', dataCriacao = '' WHERE id = 1`);
+        await db.run(`UPDATE votacao_info SET nome = '', descricao = '', dataCriacao = '', tempoLimite = 0, dataExpiracao = '' WHERE id = 1`);
         res.json({ mensagem: 'Votação resetada com sucesso!' });
     } catch (err) {
         console.error(err);

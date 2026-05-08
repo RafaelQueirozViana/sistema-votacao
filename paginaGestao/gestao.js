@@ -3,6 +3,79 @@ const ESPECIAIS = ['branco', 'nulo'];
 let winnerText;
 let _autoRefreshTimer = null;
 
+// ─── Countdown ───────────────────────────────
+let _countdownTimer = null;
+let _dataExpiracao = null;
+let _tempoLimiteTotal = 0; // em segundos, para a barra de progresso
+
+function iniciarCountdown(dataExpiracao, tempoLimiteSeg) {
+    pararCountdown();
+    _dataExpiracao = dataExpiracao ? new Date(dataExpiracao) : null;
+    _tempoLimiteTotal = tempoLimiteSeg || 0;
+
+    if (!_dataExpiracao) {
+        document.getElementById('countdown-wrap').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('countdown-wrap').style.display = 'block';
+    atualizarCountdown();
+    _countdownTimer = setInterval(atualizarCountdown, 1000);
+}
+
+function pararCountdown() {
+    if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+    _dataExpiracao = null;
+}
+
+function atualizarCountdown() {
+    if (!_dataExpiracao) return;
+
+    const agora = new Date();
+    const diff = _dataExpiracao - agora; // ms
+
+    const el = document.getElementById('countdown-valor');
+    const wrap = document.getElementById('countdown-wrap');
+    const barra = document.getElementById('countdown-barra');
+
+    if (diff <= 0) {
+        // Tempo esgotado — o servidor vai encerrar automaticamente (job de 30s)
+        el.textContent = 'Encerrando...';
+        wrap.classList.add('countdown-expirando');
+        if (barra) barra.style.width = '0%';
+        pararCountdown();
+        // Aguarda 3s e recarrega o status
+        setTimeout(carregarVisaoGeral, 3000);
+        return;
+    }
+
+    const totalSeg = Math.floor(diff / 1000);
+    const horas = Math.floor(totalSeg / 3600);
+    const minutos = Math.floor((totalSeg % 3600) / 60);
+    const segundos = totalSeg % 60;
+
+    const pad = n => String(n).padStart(2, '0');
+
+    if (horas > 0) {
+        el.textContent = `${pad(horas)}h ${pad(minutos)}min ${pad(segundos)}s`;
+    } else if (minutos > 0) {
+        el.textContent = `${pad(minutos)}min ${pad(segundos)}s`;
+    } else {
+        el.textContent = `${pad(segundos)}s`;
+    }
+
+    // Classe de urgência
+    wrap.classList.toggle('countdown-urgente', totalSeg <= 300 && totalSeg > 60);
+    wrap.classList.toggle('countdown-critico', totalSeg <= 60);
+    wrap.classList.remove('countdown-expirando');
+
+    // Barra de progresso
+    if (barra && _tempoLimiteTotal > 0) {
+        const pct = Math.max(0, Math.min(100, (diff / (_tempoLimiteTotal * 1000)) * 100));
+        barra.style.width = pct + '%';
+    }
+}
+
 function iniciarAutoRefresh() {
     pararAutoRefresh();
     _autoRefreshTimer = setInterval(carregarVisaoGeral, 5000);
@@ -29,7 +102,35 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.classList.toggle('open');
         });
     }
+
+    // Preview do tempo limite no modal
+    const inputH = document.getElementById('input-tempo-horas');
+    const inputM = document.getElementById('input-tempo-minutos');
+    if (inputH && inputM) {
+        const atualizar = () => atualizarPreviewTempo();
+        inputH.addEventListener('input', atualizar);
+        inputM.addEventListener('change', atualizar);
+        inputM.addEventListener('input', atualizar);
+    }
 });
+
+function atualizarPreviewTempo() {
+    const h = parseInt(document.getElementById('input-tempo-horas').value) || 0;
+    const m = parseInt(document.getElementById('input-tempo-minutos').value) || 0;
+    const el = document.getElementById('tempo-limite-preview');
+    if (!el) return;
+
+    if (h === 0 && m === 0) {
+        el.textContent = 'Sem limite de tempo';
+        el.className = 'tempo-limite-preview sem-limite';
+    } else {
+        const partes = [];
+        if (h > 0) partes.push(`${h}h`);
+        if (m > 0) partes.push(`${m}min`);
+        el.textContent = `Encerrará em ${partes.join(' ')}`;
+        el.className = 'tempo-limite-preview com-limite';
+    }
+}
 
 function fecharSidebar() {
     document.getElementById('sidebar')?.classList.remove('open');
@@ -75,6 +176,7 @@ document.addEventListener('keydown', e => {
 
 function sair() {
     pararAutoRefresh();
+    pararCountdown();
     document.getElementById('tela-painel').style.display = 'none';
     document.getElementById('tela-login').style.display = 'flex';
     document.getElementById('login-pass').value = '';
@@ -193,12 +295,32 @@ async function carregarVisaoGeral() {
             statusTxt.textContent = 'Votação em andamento';
             btnIniciar.disabled = true;
             btnEnc.disabled = false;
+
+            // Gerencia countdown
+            if (info.dataExpiracao) {
+                const expMs = new Date(info.dataExpiracao) - Date.now();
+                if (expMs > 0) {
+                    // Só reinicia o countdown se não estava rodando ou mudou
+                    if (!_dataExpiracao || _dataExpiracao.toISOString() !== info.dataExpiracao) {
+                        iniciarCountdown(info.dataExpiracao, info.tempoLimite * 60);
+                    }
+                } else {
+                    // Já expirou — o job do servidor vai encerrar em breve
+                    document.getElementById('countdown-wrap').style.display = 'block';
+                    document.getElementById('countdown-valor').textContent = 'Encerrando...';
+                }
+            } else {
+                pararCountdown();
+                document.getElementById('countdown-wrap').style.display = 'none';
+            }
         } else {
             badge.textContent = status.iniciada ? 'Encerrada' : 'Aguardando';
             badge.className = status.iniciada ? 'badge encerrada' : 'badge aguardando';
             statusTxt.textContent = status.iniciada ? 'Votação encerrada' : 'Votação não iniciada';
             btnIniciar.disabled = false;
             btnEnc.disabled = true;
+            pararCountdown();
+            document.getElementById('countdown-wrap').style.display = 'none';
         }
 
         const normais = resultado.filter(r => !ESPECIAIS.includes(r.candidato.toLowerCase()));
@@ -257,6 +379,8 @@ async function encerrarVotacao() {
     if (!confirm('Deseja encerrar a votação? Esta ação não pode ser desfeita.')) return;
     await fetch(API + '/encerrar', { method: 'POST' });
     await fetch(API + '/arquivar', { method: 'POST' });
+    pararCountdown();
+    document.getElementById('countdown-wrap').style.display = 'none';
     carregarVisaoGeral();
 }
 
@@ -272,7 +396,10 @@ function abrirModal() {
     document.getElementById('input-candidato').value = '';
     document.getElementById('input-nome-votacao').value = '';
     document.getElementById('input-desc-votacao').value = '';
+    document.getElementById('input-tempo-horas').value = '0';
+    document.getElementById('input-tempo-minutos').value = '0';
     document.getElementById('modal-erro').textContent = '';
+    atualizarPreviewTempo();
 
     const agora = new Date();
     document.getElementById('input-data-votacao').value =
@@ -333,6 +460,9 @@ async function confirmarInicio() {
     const erro = document.getElementById('modal-erro');
     const nome = document.getElementById('input-nome-votacao').value.trim();
     const desc = document.getElementById('input-desc-votacao').value.trim();
+    const horas = parseInt(document.getElementById('input-tempo-horas').value) || 0;
+    const minutos = parseInt(document.getElementById('input-tempo-minutos').value) || 0;
+    const tempoLimiteMin = horas * 60 + minutos; // total em minutos
 
     if (!nome) { erro.textContent = 'Informe o nome da votação.'; document.getElementById('input-nome-votacao').focus(); return; }
     if (candidatosModal.length === 0) { erro.textContent = 'Adicione ao menos um candidato.'; return; }
@@ -342,7 +472,7 @@ async function confirmarInicio() {
     await fetch(API + '/votacao-info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, descricao: desc })
+        body: JSON.stringify({ nome, descricao: desc, tempoLimite: tempoLimiteMin })
     });
 
     await fetch(API + '/candidatos', {
@@ -398,7 +528,6 @@ function fecharLightbox() {
     document.getElementById('foto-lightbox-img').src = '';
 }
 
-// Fecha lightbox com Escape
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') fecharLightbox();
 });
@@ -458,7 +587,6 @@ async function visualizarVotacao(id) {
         document.getElementById('hist-modal-data-encerramento').textContent =
             data.dataEncerramento ? new Date(data.dataEncerramento).toLocaleString('pt-BR') : '—';
 
-        // ── Resultado dos votos ──
         const tb = document.getElementById('hist-modal-tabela');
         const vazio = document.getElementById('hist-modal-vazio');
         const votos = data.votos || [];
@@ -496,14 +624,12 @@ async function visualizarVotacao(id) {
                 `).join('');
         }
 
-        // ── Participantes ──
         const participantes = data.participantes || [];
         const listaEl = document.getElementById('hist-participantes-lista');
         const vazioEl = document.getElementById('hist-participantes-vazio');
         const filtroEl = document.getElementById('hist-filtro-input');
         const filtroVazioEl = document.getElementById('hist-filtro-vazio');
 
-        // Limpa filtro ao abrir
         if (filtroEl) filtroEl.value = '';
         if (filtroVazioEl) filtroVazioEl.style.display = 'none';
 
@@ -613,7 +739,6 @@ async function carregarFuncionarios() {
     }
 }
 
-// formata DDMMAAAA → DD/MM/AAAA
 function formatarDataNasc(raw) {
     if (!raw || raw.length !== 8) return raw || '—';
     return `${raw.slice(0, 2)}/${raw.slice(2, 4)}/${raw.slice(4)}`;
@@ -632,8 +757,6 @@ function fecharModalFuncionario() {
     document.getElementById('modal-func-overlay').style.display = 'none';
 }
 
-// Máscara automática: converte DD/MM/AAAA → DDMMAAAA ao salvar
-// e mostra visualmente como DD/MM/AAAA enquanto digita
 document.addEventListener('DOMContentLoaded', () => {
     const inputNasc = document.getElementById('input-func-nasc');
     if (inputNasc) {
@@ -651,8 +774,6 @@ async function salvarFuncionario() {
     const nome = document.getElementById('input-func-nome').value.trim();
     const re = document.getElementById('input-func-re').value.trim();
     const nascRaw = document.getElementById('input-func-nasc').value.trim();
-
-    // Remove separadores para salvar só dígitos
     const nascDigitos = nascRaw.replace(/\D/g, '');
 
     erro.textContent = '';
@@ -703,7 +824,6 @@ async function excluirFuncionario(id, btn) {
     }
 }
 
-// Fecha modal de funcionário com Enter no último campo
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         fecharModalFuncionario();

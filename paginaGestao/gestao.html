@@ -43,11 +43,36 @@
                 </div>
                 <div class="modal-field">
                     <label>Descrição</label>
-                    <input type="text" id="input-desc-votacao" placeholder="Breve descrição da votação" maxlength="200" />
+                    <input type="text" id="input-desc-votacao" placeholder="Breve descrição da votação"
+                        maxlength="200" />
                 </div>
                 <div class="modal-field modal-field-date">
                     <label>Data de Criação</label>
                     <input type="text" id="input-data-votacao" readonly />
+                </div>
+
+                <!-- ── TEMPO LIMITE ── -->
+                <div class="modal-field">
+                    <label>
+                        Tempo Limite
+                        <span class="modal-field-hint">(opcional — deixe em 0 para sem limite)</span>
+                    </label>
+                    <div class="tempo-limite-wrap">
+                        <div class="tempo-limite-grupo">
+                            <input type="number" id="input-tempo-horas" class="tempo-limite-input" min="0" max="99"
+                                value="0" placeholder="0"
+                                oninput="this.value=Math.max(0,Math.min(99,parseInt(this.value)||0))" />
+                            <span class="tempo-limite-label">h</span>
+                        </div>
+                        <span class="tempo-limite-sep">:</span>
+                        <div class="tempo-limite-grupo">
+                            <input type="number" id="input-tempo-minutos" class="tempo-limite-input" min="0" max="59"
+                                value="0" placeholder="0"
+                                oninput="this.value=Math.max(0,Math.min(59,parseInt(this.value)||0))" />
+                            <span class="tempo-limite-label">min</span>
+                        </div>
+                        <span id="tempo-limite-preview" class="tempo-limite-preview"></span>
+                    </div>
                 </div>
             </div>
 
@@ -126,13 +151,8 @@
 
                 <div class="rel-filtro-wrap">
                     <span class="material-icons rel-filtro-icon">search</span>
-                    <input
-                        type="text"
-                        id="hist-filtro-input"
-                        class="rel-filtro-input"
-                        placeholder="Filtrar por nome..."
-                        oninput="filtrarParticipantesHist(this.value)"
-                    />
+                    <input type="text" id="hist-filtro-input" class="rel-filtro-input" placeholder="Filtrar por nome..."
+                        oninput="filtrarParticipantesHist(this.value)" />
                 </div>
 
                 <div id="hist-participantes-lista" class="rel-modal-lista"></div>
@@ -177,7 +197,8 @@
                         oninput="this.value=this.value.replace(/\D/g,'')" />
                 </div>
                 <div class="modal-field">
-                    <label>Data de Nascimento <span class="modal-field-hint">(será a senha do funcionário)</span></label>
+                    <label>Data de Nascimento <span class="modal-field-hint">(será a senha do
+                            funcionário)</span></label>
                     <input type="text" id="input-func-nasc" placeholder="DD/MM/AAAA" maxlength="10" />
                 </div>
             </div>
@@ -230,7 +251,7 @@
                 </button>
             </div>
         </aside>
-''''''''''''
+
         <main class="conteudo">
             <!-- ABA: VISÃO GERAL -->
             <div id="aba-visao-geral" class="aba">
@@ -246,7 +267,8 @@
                         <p id="status-texto" class="control-value">—</p>
                         <div class="control-actions">
                             <button id="btn-iniciar" class="btn-green" onclick="iniciarVotacao()">Criar Votação</button>
-                            <button id="btn-encerrar" class="btn-red" onclick="encerrarVotacao()">Encerrar Votação</button>
+                            <button id="btn-encerrar" class="btn-red" onclick="encerrarVotacao()">Encerrar
+                                Votação</button>
                         </div>
                     </div>
                     <div class="control-card">
@@ -259,10 +281,25 @@
                     </div>
                 </div>
 
+                <!-- Countdown de tempo limite -->
+                <div id="countdown-wrap" class="countdown-wrap" style="display:none">
+                    <div class="countdown-inner">
+                        <span class="material-icons countdown-icon">timer</span>
+                        <div class="countdown-info">
+                            <p class="countdown-label">Encerramento automático em</p>
+                            <p id="countdown-valor" class="countdown-valor">—</p>
+                        </div>
+                        <div id="countdown-barra-wrap" class="countdown-barra-wrap">
+                            <div id="countdown-barra" class="countdown-barra"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="resultado-vazio" class="resultado-vazio" style="display:none">
                     <span class="resultado-vazio-icon">🗳</span>
                     <p class="resultado-vazio-titulo">Aguardando início de uma nova votação</p>
-                    <p class="resultado-vazio-sub">Os votos aparecerão aqui em tempo real assim que uma votação for iniciada.</p>
+                    <p class="resultado-vazio-sub">Os votos aparecerão aqui em tempo real assim que uma votação for
+                        iniciada.</p>
                 </div>
 
                 <div id="resultado-ativo" style="display:none">
@@ -330,7 +367,8 @@
                 </div>
 
                 <p class="section-title">Funcionários autorizados a votar</p>
-                <p class="func-subtitle">O RE e a data de nascimento de cada funcionário servem como credenciais de acesso à votação.</p>
+                <p class="func-subtitle">O RE e a data de nascimento de cada funcionário servem como credenciais de
+                    acesso à votação.</p>
 
                 <div id="funcionarios-lista" style="margin-top:16px"></div>
             </div>
