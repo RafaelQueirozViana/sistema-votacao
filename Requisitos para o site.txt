@@ -1,12 +1,17 @@
 Funcionalidades e mini ajustes necessarios para fazer:
 
-3. Atalho no Banner de Vencedor (Winner Banner):
-Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
-Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
 
+1.Arrumar verificação de inputs:
 -na pagina de gestao, na guia cadastro de funcionarios, no campo nome completo,fazer o campo so dar para colocar texto
 - fazer os campos RE Do funcionário da pagina de gestao(da guia cadastro de funcionario) e da pagina de votação precisar obrigatoriamente ter 5 caracteres. Adicione essa verificação
 
-PENSAMENTO QUE TIVE
+2. Atalho no Banner de Vencedor (Winner Banner):
+Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
+Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
 
-QUANDO EU QUISER APAGAR OS VOTOS QUE TEVE ATE AGORA, EU TENHO Q TER ALGUM BACKUP DOS FUNCIONARIOS QUE FORAM ADICIONADOS PELO CARLOS
+
+3.Acessibilidade na pagina de votação (apenas na página de votação): 
+-Deixar a página e formulário de votação com o estilo mais acessível, usando letra de forma e fontes maiores para funcionários mais leigos.
+
+4.Adicionar Campo de pesquisa de funcionário na página de gestão:
+ -Na guia Cadastro de Funcionários, adicionar um campo para pesquisar funcionários pelo nome. Servirá para quando tiver muitos funcionários cadastrados, facilitando na hora de encontrar.

@@ -2073,7 +2073,7 @@ td.dim {
   outline: none;
   text-align: center;
   box-shadow: none !important;
-  
+
 }
 
 .tempo-limite-input::-webkit-outer-spin-button,
@@ -2294,3 +2294,34 @@ td.dim {
     margin-bottom: 0;
   }
 }
+
+.show-detail-btn {
+  width: max-content;
+  padding: 8px 10px;
+  border: 1px solid #fff;
+  background-color: transparent;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: .8;
+  margin-top: 8px;
+  transition: opacity.3s ease;
+}
+
+.show-detail-btn:hover {
+  opacity: 1;
+}
+
+/* #tela-login {
+  display: none !important;
+}
+
+#tela-painel {
+  display: flex !important;
+} */
+/* 
+#resultado-final,
+#winner-banner {
+  display: block !important;
+} */

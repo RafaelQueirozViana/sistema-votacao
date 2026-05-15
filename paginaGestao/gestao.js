@@ -228,6 +228,7 @@ function renderWinnerBanner(normais, containerId) {
                 <div class="winner-banner-label">Empate</div>
                 <div class="winner-banner-nomes">${vencedores.map(v => capitalize(v.candidato)).join(' · ')}</div>
                 <div class="winner-banner-votos">${maxVotos} votos cada</div>
+                <button class="show-detail-btn">Ver Detalhes</button>
             </div>`;
     } else {
         el.innerHTML = `
