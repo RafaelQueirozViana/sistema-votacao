@@ -190,12 +190,13 @@
             <div class="modal-meta">
                 <div class="modal-field">
                     <label>Nome Completo</label>
-                    <input type="text" id="input-func-nome" placeholder="Ex: João da Silva" maxlength="100" />
+                    <input type="text" id="input-func-nome" placeholder="Ex: João da Silva" maxlength="100"
+                        oninput="this.value=this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g,'')" />
                 </div>
                 <div class="modal-field">
                     <label>RE (Registro do Empregado)</label>
-                    <input type="text" id="input-func-re" placeholder="Ex: 00123" maxlength="5"
-                        oninput="this.value=this.value.replace(/\D/g,'')" />
+                    <input type="text" id="input-func-re" placeholder="Ex: 0012" maxlength="4"
+                        oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" />
                 </div>
                 <div class="modal-field">
                     <label>Data de Nascimento <span class="modal-field-hint">(será a senha do

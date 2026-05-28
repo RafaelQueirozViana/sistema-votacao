@@ -285,6 +285,7 @@ async function carregarVisaoGeral() {
                 : 'Resultado Final';
         }
 
+
         const badge = document.getElementById('status-badge');
         const statusTxt = document.getElementById('status-texto');
         const btnIniciar = document.getElementById('btn-iniciar');
@@ -780,7 +781,7 @@ async function salvarFuncionario() {
     erro.textContent = '';
 
     if (!nome) { erro.textContent = 'Informe o nome completo.'; return; }
-    if (!re) { erro.textContent = 'Informe o RE.'; return; }
+    if (re.length < 4) { erro.textContent = 'O RE deve ter exatamente 4 dígitos.'; return; }
     if (nascDigitos.length !== 8) { erro.textContent = 'Informe a data de nascimento completa (DD/MM/AAAA).'; return; }
 
     const btnSalvar = document.getElementById('btn-salvar-func');

@@ -317,6 +317,14 @@ async function votar() {
         mostrarPopup('Preencha todos os campos antes de votar.', 'erro');
         return;
     }
+    if (idFuncionario.length !== 4) {
+        mostrarPopup('O RE deve ter exatamente 4 dígitos.', 'erro');
+        return;
+    }
+    if (senha.length !== 8) {
+        mostrarPopup('A senha deve ter exatamente 8 dígitos (sua data de nascimento: DDMMAAAA).', 'erro');
+        return;
+    }
 
     try {
         const res = await fetch(API + '/votar', {
@@ -393,5 +401,5 @@ function mostrarPopup(mensagem, tipo = 'sucesso') {
 }
 
 function fecharPopup() {
-    document.getElementById('popup').style.display = 'none';
+    document.getElementById('popup').style.display = 'none'
 }

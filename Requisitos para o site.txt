@@ -1,17 +1,21 @@
 Funcionalidades e mini ajustes necessarios para fazer:
 
 
-1.Arrumar verificação de inputs:
--na pagina de gestao, na guia cadastro de funcionarios, no campo nome completo,fazer o campo so dar para colocar texto
-- fazer os campos RE Do funcionário da pagina de gestao(da guia cadastro de funcionario) e da pagina de votação precisar obrigatoriamente ter 5 caracteres. Adicione essa verificação
+1.Na pagina de gestão,na criação de uma nova votação, no campo tempo limite (para limitar o tempo que o formulário estará aberto do modal), é possível definir em horas e minutos. Adicione para poder definir em dias também.
 
-2. Atalho no Banner de Vencedor (Winner Banner):
+
+2. Agora implemente a seguinte mudança:
+-Na página de votação, aprimore a seleção de candidato, onde agora ele vai exibir de modo bem mais intuitivo, mostrando a foto do candidato e nome. Deixe de modo intuitivo, se quiser fazer um novo modal para seleção dos candidatos, separando da parte de colocar RE do funcionário e senha fique a vontade. A partir daí, será necessário colocar/importar a foto de cada candidato na hora de criar a votação pela página de gestão. 
+
+3 - Acessibilidade na pagina de votação (apenas na página de votação): 
+-Deixar a página e formulário de votação com o estilo mais acessível, usando interface maior, letra de forma e fontes maiores e com letras maiúsculas para funcionários mais leigos ou com problema de visão.
+
+4 -Na pagina de gestão, no modal de cadastro de funcionário, adicionar verificação no campo de data de nascimento, onde se a data de nascimento colocada fazer a pessoa ter mais ou menos de 100 anos dê erro.
+
+5.Adicionar Campo de pesquisa de funcionário na página de gestão:
+ -Na guia Cadastro de Funcionários, adicionar um campo para pesquisar funcionários pelo nome. Servirá para quando tiver muitos funcionários cadastrados, facilitando na hora de encontrar.
+
+
+5. Atalho no Banner de Vencedor (Winner Banner):
 Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
 Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
-
-
-3.Acessibilidade na pagina de votação (apenas na página de votação): 
--Deixar a página e formulário de votação com o estilo mais acessível, usando letra de forma e fontes maiores para funcionários mais leigos.
-
-4.Adicionar Campo de pesquisa de funcionário na página de gestão:
- -Na guia Cadastro de Funcionários, adicionar um campo para pesquisar funcionários pelo nome. Servirá para quando tiver muitos funcionários cadastrados, facilitando na hora de encontrar.
