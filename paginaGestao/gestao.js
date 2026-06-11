@@ -39,24 +39,25 @@ function atualizarCountdown() {
     const barra = document.getElementById('countdown-barra');
 
     if (diff <= 0) {
-        // Tempo esgotado — o servidor vai encerrar automaticamente (job de 30s)
         el.textContent = 'Encerrando...';
         wrap.classList.add('countdown-expirando');
         if (barra) barra.style.width = '0%';
         pararCountdown();
-        // Aguarda 3s e recarrega o status
         setTimeout(carregarVisaoGeral, 3000);
         return;
     }
 
     const totalSeg = Math.floor(diff / 1000);
-    const horas = Math.floor(totalSeg / 3600);
+    const dias = Math.floor(totalSeg / 86400);
+    const horas = Math.floor((totalSeg % 86400) / 3600);
     const minutos = Math.floor((totalSeg % 3600) / 60);
     const segundos = totalSeg % 60;
 
     const pad = n => String(n).padStart(2, '0');
 
-    if (horas > 0) {
+    if (dias > 0) {
+        el.textContent = `${dias}d ${pad(horas)}h ${pad(minutos)}min ${pad(segundos)}s`;
+    } else if (horas > 0) {
         el.textContent = `${pad(horas)}h ${pad(minutos)}min ${pad(segundos)}s`;
     } else if (minutos > 0) {
         el.textContent = `${pad(minutos)}min ${pad(segundos)}s`;
@@ -64,9 +65,9 @@ function atualizarCountdown() {
         el.textContent = `${pad(segundos)}s`;
     }
 
-    // Classe de urgência
-    wrap.classList.toggle('countdown-urgente', totalSeg <= 300 && totalSeg > 60);
-    wrap.classList.toggle('countdown-critico', totalSeg <= 60);
+    // Classe de urgência (só se não tiver dias)
+    wrap.classList.toggle('countdown-urgente', dias === 0 && totalSeg <= 300 && totalSeg > 60);
+    wrap.classList.toggle('countdown-critico', dias === 0 && totalSeg <= 60);
     wrap.classList.remove('countdown-expirando');
 
     // Barra de progresso
@@ -104,10 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Preview do tempo limite no modal
+    const inputD = document.getElementById('input-tempo-dias');
     const inputH = document.getElementById('input-tempo-horas');
     const inputM = document.getElementById('input-tempo-minutos');
-    if (inputH && inputM) {
+    if (inputD && inputH && inputM) {
         const atualizar = () => atualizarPreviewTempo();
+        inputD.addEventListener('input', atualizar);
         inputH.addEventListener('input', atualizar);
         inputM.addEventListener('change', atualizar);
         inputM.addEventListener('input', atualizar);
@@ -115,16 +118,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function atualizarPreviewTempo() {
+    const d = parseInt(document.getElementById('input-tempo-dias').value) || 0;
     const h = parseInt(document.getElementById('input-tempo-horas').value) || 0;
     const m = parseInt(document.getElementById('input-tempo-minutos').value) || 0;
     const el = document.getElementById('tempo-limite-preview');
     if (!el) return;
 
-    if (h === 0 && m === 0) {
+    if (d === 0 && h === 0 && m === 0) {
         el.textContent = 'Sem limite de tempo';
         el.className = 'tempo-limite-preview sem-limite';
     } else {
         const partes = [];
+        if (d > 0) partes.push(`${d}d`);
         if (h > 0) partes.push(`${h}h`);
         if (m > 0) partes.push(`${m}min`);
         el.textContent = `Encerrará em ${partes.join(' ')}`;
@@ -285,7 +290,6 @@ async function carregarVisaoGeral() {
                 : 'Resultado Final';
         }
 
-
         const badge = document.getElementById('status-badge');
         const statusTxt = document.getElementById('status-texto');
         const btnIniciar = document.getElementById('btn-iniciar');
@@ -302,12 +306,10 @@ async function carregarVisaoGeral() {
             if (info.dataExpiracao) {
                 const expMs = new Date(info.dataExpiracao) - Date.now();
                 if (expMs > 0) {
-                    // Só reinicia o countdown se não estava rodando ou mudou
                     if (!_dataExpiracao || _dataExpiracao.toISOString() !== info.dataExpiracao) {
                         iniciarCountdown(info.dataExpiracao, info.tempoLimite * 60);
                     }
                 } else {
-                    // Já expirou — o job do servidor vai encerrar em breve
                     document.getElementById('countdown-wrap').style.display = 'block';
                     document.getElementById('countdown-valor').textContent = 'Encerrando...';
                 }
@@ -398,6 +400,7 @@ function abrirModal() {
     document.getElementById('input-candidato').value = '';
     document.getElementById('input-nome-votacao').value = '';
     document.getElementById('input-desc-votacao').value = '';
+    document.getElementById('input-tempo-dias').value = '0';
     document.getElementById('input-tempo-horas').value = '0';
     document.getElementById('input-tempo-minutos').value = '0';
     document.getElementById('modal-erro').textContent = '';
@@ -462,9 +465,10 @@ async function confirmarInicio() {
     const erro = document.getElementById('modal-erro');
     const nome = document.getElementById('input-nome-votacao').value.trim();
     const desc = document.getElementById('input-desc-votacao').value.trim();
+    const dias = parseInt(document.getElementById('input-tempo-dias').value) || 0;
     const horas = parseInt(document.getElementById('input-tempo-horas').value) || 0;
     const minutos = parseInt(document.getElementById('input-tempo-minutos').value) || 0;
-    const tempoLimiteMin = horas * 60 + minutos; // total em minutos
+    const tempoLimiteMin = dias * 24 * 60 + horas * 60 + minutos; // total em minutos
 
     if (!nome) { erro.textContent = 'Informe o nome da votação.'; document.getElementById('input-nome-votacao').focus(); return; }
     if (candidatosModal.length === 0) { erro.textContent = 'Adicione ao menos um candidato.'; return; }

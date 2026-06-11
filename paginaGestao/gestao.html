@@ -59,9 +59,16 @@
                     </label>
                     <div class="tempo-limite-wrap">
                         <div class="tempo-limite-grupo">
-                            <input type="number" id="input-tempo-horas" class="tempo-limite-input" min="0" max="99"
+                            <input type="number" id="input-tempo-dias" class="tempo-limite-input" min="0" max="30"
                                 value="0" placeholder="0"
-                                oninput="this.value=Math.max(0,Math.min(99,parseInt(this.value)||0))" />
+                                oninput="this.value=Math.max(0,Math.min(30,parseInt(this.value)||0))" />
+                            <span class="tempo-limite-label">d</span>
+                        </div>
+                        <span class="tempo-limite-sep">:</span>
+                        <div class="tempo-limite-grupo">
+                            <input type="number" id="input-tempo-horas" class="tempo-limite-input" min="0" max="23"
+                                value="0" placeholder="0"
+                                oninput="this.value=Math.max(0,Math.min(23,parseInt(this.value)||0))" />
                             <span class="tempo-limite-label">h</span>
                         </div>
                         <span class="tempo-limite-sep">:</span>
