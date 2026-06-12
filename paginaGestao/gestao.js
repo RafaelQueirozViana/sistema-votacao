@@ -2,6 +2,7 @@ const API = 'http://localhost:3000';
 const ESPECIAIS = ['branco', 'nulo'];
 let winnerText;
 let _autoRefreshTimer = null;
+let _funcionariosData = [];
 
 // ─── Countdown ───────────────────────────────
 let _countdownTimer = null;
@@ -696,53 +697,81 @@ async function excluirVotacao(id, btn) {
 
 async function carregarFuncionarios() {
     const lista = document.getElementById('funcionarios-lista');
+    const filtroEl = document.getElementById('func-filtro-input');
     lista.innerHTML = '<p class="hist-loading">Carregando...</p>';
 
     try {
         const res = await fetch(API + '/funcionarios');
         const data = await res.json();
 
-        if (!data || data.length === 0) {
+        _funcionariosData = data || [];
+        if (filtroEl) filtroEl.value = '';
+        document.getElementById('func-filtro-vazio').style.display = 'none';
+
+        renderizarFuncionarios(_funcionariosData);
+
+    } catch {
+        lista.innerHTML = '<p class="hist-loading" style="color:#c0392b">Erro ao carregar funcionários.</p>';
+    }
+}
+
+function renderizarFuncionarios(data) {
+    const lista = document.getElementById('funcionarios-lista');
+
+    if (!data || data.length === 0) {
+        if (_funcionariosData.length === 0) {
             lista.innerHTML = `
                 <div class="func-vazio">
                     <span class="func-vazio-icon">👥</span>
                     <p class="func-vazio-titulo">Nenhum funcionário cadastrado</p>
                     <p class="func-vazio-sub">Adicione funcionários para liberar o acesso à votação.</p>
                 </div>`;
-            return;
+        } else {
+            lista.innerHTML = '';
         }
-
-        lista.innerHTML = `
-            <div style="overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);">
-                <table style="width:100%;border-collapse:collapse;background:var(--surface)">
-                    <thead>
-                        <tr>
-                            <th class="func-th">Nome</th>
-                            <th class="func-th">RE</th>
-                            <th class="func-th">Data de Nascimento</th>
-                            <th class="func-th" style="text-align:right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(f => `
-                            <tr class="func-row">
-                                <td class="func-td">${escapeHtml(f.nome)}</td>
-                                <td class="func-td func-re">${escapeHtml(f.re)}</td>
-                                <td class="func-td func-nasc">${formatarDataNasc(f.dataNascimento)}</td>
-                                <td class="func-td" style="text-align:right">
-                                    <button class="btn-func-del" onclick="excluirFuncionario(${f.id}, this)">Excluir</button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-            <p class="func-count">${data.length} funcionário${data.length !== 1 ? 's' : ''} cadastrado${data.length !== 1 ? 's' : ''}</p>
-        `;
-
-    } catch {
-        lista.innerHTML = '<p class="hist-loading" style="color:#c0392b">Erro ao carregar funcionários.</p>';
+        return;
     }
+
+    lista.innerHTML = `
+        <div style="overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);">
+            <table style="width:100%;border-collapse:collapse;background:var(--surface)">
+                <thead>
+                    <tr>
+                        <th class="func-th">Nome</th>
+                        <th class="func-th">RE</th>
+                        <th class="func-th">Data de Nascimento</th>
+                        <th class="func-th" style="text-align:right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(f => `
+                        <tr class="func-row">
+                            <td class="func-td">${escapeHtml(f.nome)}</td>
+                            <td class="func-td func-re">${escapeHtml(f.re)}</td>
+                            <td class="func-td func-nasc">${formatarDataNasc(f.dataNascimento)}</td>
+                            <td class="func-td" style="text-align:right">
+                                <button class="btn-func-del" onclick="excluirFuncionario(${f.id}, this)">Excluir</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        <p class="func-count">${data.length} funcionário${data.length !== 1 ? 's' : ''} encontrado${data.length !== 1 ? 's' : ''}</p>
+    `;
+}
+
+function filtrarFuncionarios(termo) {
+    const termoBaixo = termo.trim().toLowerCase();
+    const vazioEl = document.getElementById('func-filtro-vazio');
+
+    const filtrados = !termoBaixo
+        ? _funcionariosData
+        : _funcionariosData.filter(f => (f.nome || '').toLowerCase().includes(termoBaixo));
+
+    renderizarFuncionarios(filtrados);
+
+    vazioEl.style.display = (termoBaixo && _funcionariosData.length > 0 && filtrados.length === 0) ? 'block' : 'none';
 }
 
 function formatarDataNasc(raw) {

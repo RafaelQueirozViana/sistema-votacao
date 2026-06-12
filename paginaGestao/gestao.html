@@ -381,7 +381,17 @@
                 <p class="func-subtitle">O RE e a data de nascimento de cada funcionário servem como credenciais de
                     acesso à votação.</p>
 
+                <div class="rel-filtro-wrap">
+                    <span class="material-icons rel-filtro-icon">search</span>
+                    <input type="text" id="func-filtro-input" class="rel-filtro-input"
+                        placeholder="Pesquisar funcionário por nome..." oninput="filtrarFuncionarios(this.value)" />
+                </div>
+
                 <div id="funcionarios-lista" style="margin-top:16px"></div>
+                <p id="func-filtro-vazio"
+                    style="display:none;text-align:center;color:var(--muted);padding:24px;font-size:0.875rem;font-weight:300">
+                    Nenhum funcionário encontrado para esta busca.
+                </p>
             </div>
 
         </main>
