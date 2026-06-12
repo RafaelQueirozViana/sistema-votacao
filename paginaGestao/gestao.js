@@ -228,23 +228,53 @@ function renderWinnerBanner(normais, containerId) {
     const vencedores = normais.filter(r => r.total === maxVotos);
     const empate = vencedores.length > 1;
 
+    const mostrarAtalho = containerId === 'winner-banner';
+    const btnAtalho = mostrarAtalho
+        ? `<button class="show-detail-btn" onclick="irParaHistoricoDetalhe()">Ver Detalhes</button>`
+        : '';
+
     if (empate) {
         el.innerHTML = `
             <div class="winner-banner-inner empate">
-                <div class="winner-banner-label">Empate</div>
-                <div class="winner-banner-nomes">${vencedores.map(v => capitalize(v.candidato)).join(' · ')}</div>
-                <div class="winner-banner-votos">${maxVotos} votos cada</div>
-                <button class="show-detail-btn">Ver Detalhes</button>
+                 <div class="win-box">
+                    <div class="winner-banner-label">Empate</div>
+                    <div class="winner-banner-nomes">${vencedores.map(v => capitalize(v.candidato)).join(' · ')}</div>
+                    <div class="winner-banner-votos">${maxVotos} votos cada</div>
+                 </div> 
+                    ${btnAtalho}
             </div>`;
     } else {
         el.innerHTML = `
-            <div class="winner-banner-inner">
+         <div class="winner-banner-inner">
+            <div class="win-box">
                 <div class="winner-banner-label">Ganhador DA ELEIÇÃO ( CIPA 2026)</div>
                 <div class="winner-banner-nome">${capitalize(normais[0].candidato)}</div>
                 <div class="winner-banner-votos">${normais[0].total} votos</div>
-            </div>`;
+            </div> 
+               ${btnAtalho}
+        </div>`
     }
     el.style.display = 'block';
+}
+async function irParaHistoricoDetalhe() {
+    // Encontra o botão da aba "Histórico de Votações" e simula o clique nele
+    let histBtn = null;
+    document.querySelectorAll('.nav-btn').forEach(b => {
+        if (b.textContent.includes('Histórico')) histBtn = b;
+    });
+    if (histBtn) mostrarAba('historico', histBtn);
+
+    try {
+        const res = await fetch(API + '/historico');
+        const data = await res.json();
+
+        if (data && data.length > 0) {
+            // A votação mais recente é a que está sendo exibida no banner
+            setTimeout(() => visualizarVotacao(data[0].id), 300);
+        }
+    } catch {
+        alert('Erro ao abrir detalhes da votação.');
+    }
 }
 
 function renderTabelaResultado(tbId, normais, especiais, totalValidos) {

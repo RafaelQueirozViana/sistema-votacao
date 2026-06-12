@@ -1139,9 +1139,10 @@ td.dim {
 }
 
 .winner-banner-inner {
-  display: flex;
-  flex-direction: column;
 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
   background: var(--text);
   color: #fff;
@@ -1149,6 +1150,14 @@ td.dim {
   padding: 20px 24px;
   margin-bottom: 16px;
   background: linear-gradient(135deg, #6b80f6 0%, #17171A 100%);
+  min-height: 160px;
+}
+
+.winner-banner-inner .show-detail-btn {
+  height: max-content;
+  opacity: 0.5;
+  font-size: 16px;
+  letter-spacing: 1px;
 }
 
 .winner-banner-inner.empate {
@@ -2319,8 +2328,8 @@ td.dim {
 
 #tela-painel {
   display: flex !important;
-} */
-/* 
+}
+
 #resultado-final,
 #winner-banner {
   display: block !important;

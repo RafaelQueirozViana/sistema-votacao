@@ -7,10 +7,6 @@ Funcionalidades e mini ajustes necessarios para fazer:
 2 - Acessibilidade na pagina de votação (apenas na página de votação): 
 -Deixar a página e formulário de votação com o estilo mais acessível, usando interface maior, letra de forma e fontes maiores e com letras maiúsculas para funcionários mais leigos ou com problema de visão.
 
-3.Adicionar Campo de pesquisa de funcionário na página de gestão:
- -Na guia Cadastro de Funcionários, adicionar um campo para pesquisar funcionários pelo nome. Servirá para quando tiver muitos funcionários cadastrados, facilitando na hora de encontrar.
-
-
 4. Atalho no Banner de Vencedor (Winner Banner):
 Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
 Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.

@@ -129,7 +129,9 @@
 
             <div class="modal-divider" style="margin:20px 0"></div>
 
-            <div id="hist-winner-banner" class="winner-banner" style="margin-bottom:16px"></div>
+            <div id="hist-winner-banner" class="winner-banner" style="margin-bottom:16px">
+
+            </div>
 
             <p class="modal-label-section">Resultado Final da Votação</p>
 
@@ -335,7 +337,17 @@
                         <span class="resultado-pill final">Resultado Final - ELEIÇÃO CIPA</span>
                     </div>
                     <div id="winner-banner" class="winner-banner">
+                        <div class="winner-banner-inner">
+                            <div class="win-box">
+                                <div class="winner-banner-label">Ganhador DA ELEIÇÃO ( CIPA 2026)</div>
+                                <div class="winner-banner-nome">${capitalize(normais[0].candidato)}</div>
+                                <div class="winner-banner-votos">${normais[0].total} votos</div>
+                            </div> 
 
+                            <button class="show-detail-btn" onclick="irParaHistoricoDetalhe()">Ver Detalhes</button>
+                        </div>
+
+                        
                     </div>
                     <div class="card">
                         <table>
