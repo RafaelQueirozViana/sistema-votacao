@@ -788,6 +788,33 @@ async function salvarFuncionario() {
     if (re.length < 4) { erro.textContent = 'O RE deve ter exatamente 4 dígitos.'; return; }
     if (nascDigitos.length !== 8) { erro.textContent = 'Informe a data de nascimento completa (DD/MM/AAAA).'; return; }
 
+    const diaNasc = parseInt(nascDigitos.slice(0, 2), 10);
+    const mesNasc = parseInt(nascDigitos.slice(2, 4), 10);
+    const anoNasc = parseInt(nascDigitos.slice(4, 8), 10);
+    const dataNasc = new Date(anoNasc, mesNasc - 1, diaNasc);
+
+    const dataValida =
+        dataNasc.getFullYear() === anoNasc &&
+        dataNasc.getMonth() === mesNasc - 1 &&
+        dataNasc.getDate() === diaNasc;
+
+    if (!dataValida) {
+        erro.textContent = 'Data de nascimento inválida.';
+        return;
+    }
+
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - dataNasc.getFullYear();
+    const aindaNaoFezAniversario =
+        hoje.getMonth() < dataNasc.getMonth() ||
+        (hoje.getMonth() === dataNasc.getMonth() && hoje.getDate() < dataNasc.getDate());
+    if (aindaNaoFezAniversario) idade--;
+
+    if (idade < 0 || idade > 100) {
+        erro.textContent = 'Data de nascimento inválida: idade deve ser entre 0 e 100 anos.';
+        return;
+    }
+
     const btnSalvar = document.getElementById('btn-salvar-func');
     btnSalvar.disabled = true;
     btnSalvar.textContent = 'Salvando...';
