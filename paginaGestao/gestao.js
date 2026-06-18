@@ -256,6 +256,15 @@ function renderWinnerBanner(normais, containerId) {
     }
     el.style.display = 'block';
 }
+
+
+
+
+
+
+
+
+
 async function irParaHistoricoDetalhe() {
     // Encontra o botão da aba "Histórico de Votações" e simula o clique nele
     let histBtn = null;

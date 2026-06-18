@@ -1,16 +1,18 @@
 Funcionalidades e mini ajustes necessarios para fazer:
 
-
 1. Agora implemente a seguinte mudança:
 -Na página de votação, aprimore a seleção de candidato, onde agora ele vai exibir de modo bem mais intuitivo, mostrando a foto do candidato e nome. Deixe de modo intuitivo, se quiser fazer um novo modal para seleção dos candidatos, separando da parte de colocar RE do funcionário e senha fique a vontade. A partir daí, será possível colocar/importar a foto de cada candidato na hora de criar a votação pela página de gestão, mas se o gestor não quiser importar funcionará normalmente do mesmo jeito. 
 
 2 - Acessibilidade na pagina de votação (apenas na página de votação): 
 -Deixar a página e formulário de votação com o estilo mais acessível, usando interface maior, letra de forma e fontes maiores e com letras maiúsculas para funcionários mais leigos ou com problema de visão.
 
-4. Atalho no Banner de Vencedor (Winner Banner):
-Na guia 'Status de Votação', adicione um botão chamado 'Ver mais detalhes' dentro do banner do vencedor.
-Comportamento esperado: Ao clicar, o sistema deve levar para a guia 'Histórico de Votações' e abrir o respectivo modal de detalhes (modal-box modal-box-wide) daquela votação específica, servindo como um atalho do botão 'Visualizar' do histórico.
 
 
 
 // obs: para encerrar uma votação costuma levar o tempo definido pelo gestor mais um acrescimo de no maximo 10 segundos para finalizar a votacao
+
+Este é o meu projeto de votação, onde na imagem é mostrado a estrutura de pastas. Preciso que voce realiza a seguinte mudança nesse meu projeto:
+
+ Acessibilidade na pagina de votação (apenas na página de votação): 
+-Deixar a página e formulário de votação com o estilo mais acessível, usando interface maior, letra maiúsculas, fontes maiores... para funcionários mais leigos ou com problema de visão.
+
